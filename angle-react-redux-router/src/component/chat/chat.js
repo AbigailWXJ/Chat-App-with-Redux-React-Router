@@ -4,7 +4,6 @@ import io from 'socket.io-client';
 import {connect} from 'react-redux';
 import {getMsgList,sendMsg,recvMsg,readMsg} from '../../reduxs/chat.redux';
 import {getChatId} from '../../util'
-// 由于我们现在是跨域连接，所以需要手动连接
 const socket=io('ws://localhost:9093');
 @connect(
     state=>state,
