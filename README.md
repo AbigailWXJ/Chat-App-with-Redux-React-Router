@@ -1,87 +1,161 @@
-This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
-
-Below you will find some information on how to perform common tasks.<br>
-You can find the most recent version of this guide [here](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md).
-
 ## Table of Contents
 
-- [Updating to New Releases](#updating-to-new-releases)
-- [Sending Feedback](#sending-feedback)
-- [Folder Structure](#folder-structure)
-- [Available Scripts](#available-scripts)
-  - [npm start](#npm-start)
-  - [npm test](#npm-test)
-  - [npm run build](#npm-run-build)
-  - [npm run eject](#npm-run-eject)
-- [Supported Language Features and Polyfills](#supported-language-features-and-polyfills)
-- [Syntax Highlighting in the Editor](#syntax-highlighting-in-the-editor)
-- [Displaying Lint Output in the Editor](#displaying-lint-output-in-the-editor)
-- [Debugging in the Editor](#debugging-in-the-editor)
-- [Changing the Page `<title>`](#changing-the-page-title)
-- [Installing a Dependency](#installing-a-dependency)
-- [Importing a Component](#importing-a-component)
-- [Adding a Stylesheet](#adding-a-stylesheet)
-- [Post-Processing CSS](#post-processing-css)
-- [Adding a CSS Preprocessor (Sass, Less etc.)](#adding-a-css-preprocessor-sass-less-etc)
-- [Adding Images and Fonts](#adding-images-and-fonts)
-- [Using the `public` Folder](#using-the-public-folder)
-  - [Changing the HTML](#changing-the-html)
-  - [Adding Assets Outside of the Module System](#adding-assets-outside-of-the-module-system)
-  - [When to Use the `public` Folder](#when-to-use-the-public-folder)
-- [Using Global Variables](#using-global-variables)
-- [Adding Bootstrap](#adding-bootstrap)
-  - [Using a Custom Theme](#using-a-custom-theme)
-- [Adding Flow](#adding-flow)
-- [Adding Custom Environment Variables](#adding-custom-environment-variables)
-  - [Referencing Environment Variables in the HTML](#referencing-environment-variables-in-the-html)
-  - [Adding Temporary Environment Variables In Your Shell](#adding-temporary-environment-variables-in-your-shell)
-  - [Adding Development Environment Variables In `.env`](#adding-development-environment-variables-in-env)
-- [Can I Use Decorators?](#can-i-use-decorators)
-- [Integrating with an API Backend](#integrating-with-an-api-backend)
-  - [Node](#node)
-  - [Ruby on Rails](#ruby-on-rails)
-- [Proxying API Requests in Development](#proxying-api-requests-in-development)
-- [Using HTTPS in Development](#using-https-in-development)
-- [Generating Dynamic `<meta>` Tags on the Server](#generating-dynamic-meta-tags-on-the-server)
-- [Pre-Rendering into Static HTML Files](#pre-rendering-into-static-html-files)
-- [Injecting Data from the Server into the Page](#injecting-data-from-the-server-into-the-page)
-- [Running Tests](#running-tests)
-  - [Filename Conventions](#filename-conventions)
-  - [Command Line Interface](#command-line-interface)
-  - [Version Control Integration](#version-control-integration)
-  - [Writing Tests](#writing-tests)
-  - [Testing Components](#testing-components)
-  - [Using Third Party Assertion Libraries](#using-third-party-assertion-libraries)
-  - [Initializing Test Environment](#initializing-test-environment)
-  - [Focusing and Excluding Tests](#focusing-and-excluding-tests)
-  - [Coverage Reporting](#coverage-reporting)
-  - [Continuous Integration](#continuous-integration)
-  - [Disabling jsdom](#disabling-jsdom)
-  - [Snapshot Testing](#snapshot-testing)
-  - [Editor Integration](#editor-integration)
-- [Developing Components in Isolation](#developing-components-in-isolation)
-- [Making a Progressive Web App](#making-a-progressive-web-app)
-- [Deployment](#deployment)
-  - [Static Server](#static-server)
-  - [Other Solutions](#other-solutions)
-  - [Serving Apps with Client-Side Routing](#serving-apps-with-client-side-routing)
-  - [Building for Relative Paths](#building-for-relative-paths)
-  - [Azure](#azure)
-  - [Firebase](#firebase)
-  - [GitHub Pages](#github-pages)
-  - [Heroku](#heroku)
-  - [Modulus](#modulus)
+- [项目安装](#)
+- [项目启动](#)
+- [后端启动](#)
+- [前期项目准备](#)
+  - [Updating to New Releases](#updating-to-new-releases)
+  - [Sending Feedback](#sending-feedback)
+  - [Folder Structure](#folder-structure)
+  - [Available Scripts](#available-scripts)
+    - [`npm start`](#npm-start)
+    - [`npm test`](#npm-test)
+    - [`npm run build`](#npm-run-build)
+    - [`npm run eject`](#npm-run-eject)
+  - [Supported Language Features and Polyfills](#supported-language-features-and-polyfills)
+  - [Syntax Highlighting in the Editor](#syntax-highlighting-in-the-editor)
+  - [Displaying Lint Output in the Editor](#displaying-lint-output-in-the-editor)
+  - [Debugging in the Editor](#debugging-in-the-editor)
+  - [Changing the Page `<title>`](#changing-the-page-title)
+  - [Installing a Dependency](#installing-a-dependency)
+  - [Importing a Component](#importing-a-component)
+    - [`Button.js`](#buttonjs)
+    - [`DangerButton.js`](#dangerbuttonjs)
+  - [Adding a Stylesheet](#adding-a-stylesheet)
+    - [`Button.css`](#buttoncss)
+    - [`Button.js`](#buttonjs)
+  - [Post-Processing CSS](#post-processing-css)
+  - [Adding a CSS Preprocessor (Sass, Less etc.)](#adding-a-css-preprocessor-sass--less-etc)
+  - [Adding Images and Fonts](#adding-images-and-fonts)
+  - [Using the `public` Folder](#using-the-public-folder)
+    - [Changing the HTML](#changing-the-html)
+    - [Adding Assets Outside of the Module System](#adding-assets-outside-of-the-module-system)
+    - [When to Use the `public` Folder](#when-to-use-the-public-folder)
+  - [Using Global Variables](#using-global-variables)
+  - [Adding Bootstrap](#adding-bootstrap)
+    - [Using a Custom Theme](#using-a-custom-theme)
+  - [Adding Flow](#adding-flow)
+  - [Adding Custom Environment Variables](#adding-custom-environment-variables)
+    - [Referencing Environment Variables in the HTML](#referencing-environment-variables-in-the-html)
+    - [Adding Temporary Environment Variables In Your Shell](#adding-temporary-environment-variables-in-your-shell)
+      - [Windows (cmd.exe)](#windows-cmdexe)
+      - [Linux, macOS (Bash)](#linux--macos-bash)
+    - [Adding Development Environment Variables In `.env`](#adding-development-environment-variables-in-env)
+  - [Can I Use Decorators?](#can-i-use-decorators)
+  - [Integrating with an API Backend](#integrating-with-an-api-backend)
+    - [Node](#node)
+    - [Ruby on Rails](#ruby-on-rails)
+  - [Proxying API Requests in Development](#proxying-api-requests-in-development)
+  - [Using HTTPS in Development](#using-https-in-development)
+      - [Windows (cmd.exe)](#windows-cmdexe)
+      - [Linux, macOS (Bash)](#linux--macos-bash)
+  - [Generating Dynamic `<meta>` Tags on the Server](#generating-dynamic-meta-tags-on-the-server)
+  - [Pre-Rendering into Static HTML Files](#pre-rendering-into-static-html-files)
+  - [Injecting Data from the Server into the Page](#injecting-data-from-the-server-into-the-page)
+  - [Running Tests](#running-tests)
+    - [Filename Conventions](#filename-conventions)
+    - [Command Line Interface](#command-line-interface)
+    - [Version Control Integration](#version-control-integration)
+    - [Writing Tests](#writing-tests)
+    - [Testing Components](#testing-components)
+    - [Using Third Party Assertion Libraries](#using-third-party-assertion-libraries)
+    - [Initializing Test Environment](#initializing-test-environment)
+      - [`src/setupTests.js`](#src-setuptestsjs)
+    - [Focusing and Excluding Tests](#focusing-and-excluding-tests)
+    - [Coverage Reporting](#coverage-reporting)
+    - [Continuous Integration](#continuous-integration)
+    - [On CI servers](#on-ci-servers)
+      - [Travis CI](#travis-ci)
+    - [On your own environment](#on-your-own-environment)
+        - [Windows (cmd.exe)](#windows-cmdexe)
+        - [Linux, macOS (Bash)](#linux--macos-bash)
+    - [Disabling jsdom](#disabling-jsdom)
+    - [Snapshot Testing](#snapshot-testing)
+    - [Editor Integration](#editor-integration)
+  - [Developing Components in Isolation](#developing-components-in-isolation)
+  - [Making a Progressive Web App](#making-a-progressive-web-app)
+  - [Deployment](#deployment)
+    - [Static Server](#static-server)
+    - [Other Solutions](#other-solutions)
+    - [Serving Apps with Client-Side Routing](#serving-apps-with-client-side-routing)
+    - [Building for Relative Paths](#building-for-relative-paths)
+      - [Serving the Same Build from Different Paths](#serving-the-same-build-from-different-paths)
+    - [Azure](#azure)
+    - [Firebase](#firebase)
+    - [GitHub Pages](#github-pages)
+      - [Step 1: Add `homepage` to `package.json`](#step-1--add-homepage-to-packagejson)
+      - [Step 2: Install `gh-pages` and add `deploy` to `scripts` in `package.json`](#step-2--install-gh-pages-and-add-deploy-to-scripts-in-packagejson)
+      - [Step 3: Deploy the site by running `npm run deploy`](#step-3--deploy-the-site-by-running-npm-run-deploy)
+      - [Step 4: Ensure your project’s settings use `gh-pages`](#step-4--ensure-your-projects-settings-use-gh-pages)
+      - [Step 5: Optionally, configure the domain](#step-5--optionally--configure-the-domain)
+      - [Notes on client-side routing](#notes-on-client-side-routing)
+    - [Heroku](#heroku)
+      - [Resolving Heroku Deployment Errors](#resolving-heroku-deployment-errors)
+        - ["Module not found: Error: Cannot resolve 'file' or 'directory'"](#module-not-found--error--cannot-resolve-file-or-directory)
+        - ["Could not find a required file."](#could-not-find-a-required-file)
+    - [Modulus](#modulus)
   - [Netlify](#netlify)
-  - [Now](#now)
-  - [S3 and CloudFront](#s3-and-cloudfront)
-  - [Surge](#surge)
-- [Advanced Configuration](#advanced-configuration)
-- [Troubleshooting](#troubleshooting)
-  - [`npm start` doesn’t detect changes](#npm-start-doesnt-detect-changes)
-  - [`npm test` hangs on macOS Sierra](#npm-test-hangs-on-macos-sierra)
-  - [`npm run build` silently fails](#npm-run-build-silently-fails)
-  - [`npm run build` fails on Heroku](#npm-run-build-fails-on-heroku)
-- [Something Missing?](#something-missing)
+    - [Now](#now)
+    - [S3 and CloudFront](#s3-and-cloudfront)
+    - [Surge](#surge)
+  - [Advanced Configuration](#advanced-configuration)
+  - [Troubleshooting](#troubleshooting)
+    - [`npm start` doesn’t detect changes](#npm-start-doesnt-detect-changes)
+    - [`npm test` hangs on macOS Sierra](#npm-test-hangs-on-macos-sierra)
+    - [`npm run build` silently fails](#npm-run-build-silently-fails)
+    - [`npm run build` fails on Heroku](#npm-run-build-fails-on-heroku)
+  - [Something Missing?](#something-missing)
+# 项目安装
+```
+npm install
+```
+# 项目启动
+```
+npm start
+```
+# 后端启动
+进入到server文件下
+```
+先启动mongo
+
+nodemon.js
+```
+# 前期项目准备
+* Express+Mongodb
+  Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
+  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用増删改查方法
+  
+```js
+  const express = require('express');//引入express模块
+  const mongoose = require('mongoose'); //引入mongoose模块
+  const DB_URL = 'mongodb://localhost:27017/imooc';//链接mongo，启动mondo后的connection字段的值
+  mongoose.connect(DB_URL);//连接
+  //表示有两个字段
+  const User = mongoose.model('user', new mongoose.Schema({
+      user: {type: String, require: true},
+      age: {type: Number, require: true}
+  }))
+  User.create({
+     user: 'xuejiao',
+     age: 25
+     },function(err,doc){
+     if(!err) {
+                console.log(doc)
+              }else{
+         console.log(err)
+     }
+ })
+  //把年龄18的删掉
+  User.remove({age:18},function(err,doc){     console.log(doc)
+ })
+ User.update({'user': 'xiaoming'},{'$set':{age:27}},function(err,doc){
+     console.log(doc)
+    })
+```
+
+
+
+
 
 ## Updating to New Releases
 
