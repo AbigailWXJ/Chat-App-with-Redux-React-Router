@@ -1,9 +1,9 @@
 ## Table of Contents
 
-- [项目安装](#)
-- [项目启动](#)
-- [后端启动](#)
-- [前期项目准备](#)
+- [项目安装](#项目安装)
+- [项目启动](#项目启动)
+- [后端启动](#后端启动)
+- [前期项目准备](#前期项目准备)
   - [Updating to New Releases](#updating-to-new-releases)
   - [Sending Feedback](#sending-feedback)
   - [Folder Structure](#folder-structure)
@@ -107,7 +107,7 @@
   - [Something Missing?](#something-missing)
 # 项目安装
 ```
-npm install
+npm install##
 ```
 # 项目启动
 ```
@@ -123,7 +123,7 @@ nodemon.js
 # 前期项目准备
 * Express+Mongodb
   Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
-  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用増删改查方法
+  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
   
 ```js
   const express = require('express');//引入express模块
