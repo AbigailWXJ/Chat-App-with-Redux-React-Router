@@ -1,9 +1,9 @@
 ## Table of Contents
 
 - [项目安装](#项目安装)
-- [项目启动](#)
-- [后端启动](#)
-- [前期项目准备](#)
+- [项目启动](#项目启动)
+- [后端启动](#后端启动)
+- [前期项目准备](#前期项目准备)
   - [Updating to New Releases](#updating-to-new-releases)
   - [Sending Feedback](#sending-feedback)
   - [Folder Structure](#folder-structure)
@@ -107,7 +107,7 @@
   - [Something Missing?](#something-missing)
 # 项目安装
 ```
-npm install##
+npm install
 ```
 # 项目启动
 ```
@@ -152,10 +152,31 @@ nodemon.js
      console.log(doc)
     })
 ```
-
-
-
-
+# antd-mobile插件
+[官网链接](https://mobile.ant.design/index-cn)
+为了实现按需加载的功能，安装插件babel-plugin-import，并在package.json文件中进行配置
+```json
+"babel": {
+    "plugins": [
+      [
+        "import",
+        {
+          "libraryName": "antd-mobile",
+          "style": "css"
+        }
+      ],
+    ]
+}
+```
+# connect 装饰器
+使用connect装饰器的形式，需要安装一个装饰器插件babel-plugin-transform-decorators-legacy，
+```json
+"babel": {
+    "plugins": [
+      "transform-decorators-legacy"
+    ]
+  },
+```
 
 ## Updating to New Releases
 
