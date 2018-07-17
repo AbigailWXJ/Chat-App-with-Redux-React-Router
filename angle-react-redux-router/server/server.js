@@ -6,7 +6,7 @@ const model = require('./model');
 const Chat = model.getModel('chat');
 
 
-const app = express();
+const app = express();//app是一个express实例
 //work with express
 const server=require('http').Server(app);
 const io=require('socket.io')(server);
