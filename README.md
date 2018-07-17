@@ -1,9 +1,9 @@
 ## Table of Contents
 
-- [项目安装](# 项目安装)
-- [项目启动](# 项目启动)
-- [后端启动](# 后端启动)
-- [前期项目准备](# 前期项目准备)
+- [项目安装](#)
+- [项目启动](#)
+- [后端启动](#)
+- [前期项目准备](#)
 - [antd-mobile插件](#antd-mobile)
 - [connect 装饰器](#connect)
   - [Updating to New Releases](#updating-to-new-releases)
@@ -148,9 +148,10 @@ nodemon.js
      }
  })
   //把年龄18的删掉
-  User.remove({age:18},function(err,doc){     console.log(doc)
- })
- User.update({'user': 'xiaoming'},{'$set':{age:27}},function(err,doc){
+  User.remove({age:18},function(err,doc){
+    console.log(doc)
+  })
+  User.update({'user': 'xiaoming'},{'$set':{age:27}},function(err,doc){
      console.log(doc)
     })
 ```
