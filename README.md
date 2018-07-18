@@ -1,3 +1,82 @@
+
+# 项目安装
+```
+npm install
+```
+# 项目启动
+```
+npm start
+```
+# 后端启动
+进入到server文件下
+```
+先启动mongo
+
+nodemon.js
+```
+# 前期项目准备
+* Express+Mongodb
+  Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
+  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
+# 前后端端口不一致的解决方法
+  
+```js
+  const express = require('express');//引入express模块
+  const mongoose = require('mongoose'); //引入mongoose模块
+  const DB_URL = 'mongodb://localhost:27017/imooc';//链接mongo，启动mondo后的connection字段的值
+  mongoose.connect(DB_URL);//连接
+  //表示有两个字段
+  const User = mongoose.model('user', new mongoose.Schema({
+      user: {type: String, require: true},
+      age: {type: Number, require: true}
+  }))
+  User.create({
+     user: 'xuejiao',
+     age: 25
+     },function(err,doc){
+     if(!err) {
+                console.log(doc)
+              }else{
+         console.log(err)
+     }
+ })
+  //把年龄18的删掉
+  User.remove({age:18},function(err,doc){
+    console.log(doc)
+  })
+  User.update({'user': 'xiaoming'},{'$set':{age:27}},function(err,doc){
+     console.log(doc)
+    })
+```
+# antd-mobile插件
+[官网链接](https://mobile.ant.design/index-cn)
+为了实现按需加载的功能，安装插件babel-plugin-import，并在package.json文件中进行配置
+```json
+"babel": {
+    "plugins": [
+      [
+        "import",
+        {
+          "libraryName": "antd-mobile",
+          "style": "css"
+        }
+      ],
+    ]
+}
+```
+# connect 装饰器
+使用connect装饰器的形式，需要安装一个装饰器插件babel-plugin-transform-decorators-legacy，
+```json
+"babel": {
+    "plugins": [
+      "transform-decorators-legacy"
+    ]
+  },
+```
+
+
+
+
 ## Table of Contents
 
 - [项目安装](#)
@@ -7,6 +86,7 @@
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
 - [connect 装饰器](#connect)
+  - [Table of Contents](#table-of-contents)
   - [Updating to New Releases](#updating-to-new-releases)
   - [Sending Feedback](#sending-feedback)
   - [Folder Structure](#folder-structure)
@@ -108,81 +188,6 @@
     - [`npm run build` silently fails](#npm-run-build-silently-fails)
     - [`npm run build` fails on Heroku](#npm-run-build-fails-on-heroku)
   - [Something Missing?](#something-missing)
-# 项目安装
-```
-npm install
-```
-# 项目启动
-```
-npm start
-```
-# 后端启动
-进入到server文件下
-```
-先启动mongo
-
-nodemon.js
-```
-# 前期项目准备
-* Express+Mongodb
-  Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
-  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
-# 前后端端口不一致的解决方法
-  
-```js
-  const express = require('express');//引入express模块
-  const mongoose = require('mongoose'); //引入mongoose模块
-  const DB_URL = 'mongodb://localhost:27017/imooc';//链接mongo，启动mondo后的connection字段的值
-  mongoose.connect(DB_URL);//连接
-  //表示有两个字段
-  const User = mongoose.model('user', new mongoose.Schema({
-      user: {type: String, require: true},
-      age: {type: Number, require: true}
-  }))
-  User.create({
-     user: 'xuejiao',
-     age: 25
-     },function(err,doc){
-     if(!err) {
-                console.log(doc)
-              }else{
-         console.log(err)
-     }
- })
-  //把年龄18的删掉
-  User.remove({age:18},function(err,doc){
-    console.log(doc)
-  })
-  User.update({'user': 'xiaoming'},{'$set':{age:27}},function(err,doc){
-     console.log(doc)
-    })
-```
-# antd-mobile插件
-[官网链接](https://mobile.ant.design/index-cn)
-为了实现按需加载的功能，安装插件babel-plugin-import，并在package.json文件中进行配置
-```json
-"babel": {
-    "plugins": [
-      [
-        "import",
-        {
-          "libraryName": "antd-mobile",
-          "style": "css"
-        }
-      ],
-    ]
-}
-```
-# connect 装饰器
-使用connect装饰器的形式，需要安装一个装饰器插件babel-plugin-transform-decorators-legacy，
-```json
-"babel": {
-    "plugins": [
-      "transform-decorators-legacy"
-    ]
-  },
-```
-
 ## Updating to New Releases
 
 Create React App is divided into two packages:
