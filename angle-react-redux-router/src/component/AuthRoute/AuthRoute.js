@@ -12,7 +12,7 @@ import {connect} from 'react-redux';
  class AuthRoute extends React.Component{
     componentDidMount(){
         const publist = ['/login','/register']
-        const pathname = this.props.location.pathname
+        const pathname = this.props.location.pathname //通过pathname获取当前的url
         //如果当前的url已经是登录或者注册页面的话，就不用跳转，直接返回一个空
         if(publist.indexOf(pathname)>-1) {
             return null
