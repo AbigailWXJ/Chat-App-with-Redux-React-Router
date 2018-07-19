@@ -18,7 +18,11 @@ nodemon.js
   Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
   mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
 # 前后端端口不一致的解决方法
-  1
+  1、在webpack-dev-derver的proxy的属性中配置允许的路由接口
+  2、在package.ison文件中配置proxy;（本项目中使用）
+  3、还可以使用jsonp的形式，解决跨域的问题;
+   Jsonp的优点：它不行XMLHttpRequest对象实现的Ajax请求那样收到同源策略的限制;它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持;并且在请求完毕后可以通过调用callback的方式回传结果。
+   JSONP的缺点：他只支持GET请求而不支持POST等其他类型的HTTP请求，且只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间进行JavaScript调用的问题
 ```js
   const express = require('express');//引入express模块
   const mongoose = require('mongoose'); //引入mongoose模块
@@ -72,6 +76,194 @@ nodemon.js
     ]
   },
 ```
+# redux基础准备
+1,在搭配好的环境中，先手动实现redux，数据管理，粗糙代码如下：
+```js
+import { createStore } from 'redux';
+//action.type
+const HAND_IN_WEAPON = "HAND_IN_WEAPON";
+const APPLY_FOR_WEAPON = "APPLY_FOR_WEAPON";
+
+//reducer
+function counter(state=10,action){
+    switch(action.type) {
+        case HAND_IN_WEAPON:
+            return state-1
+            break;
+        case APPLY_FOR_WEAPON:
+            return state+1
+        default:
+        return state
+    }
+}
+//通过reducer建立store
+const store = createStore(counter);
+Redux.jsre
+//利用store.getState()得到状态
+const WeaponState=store.getState();
+console.log(WeaponState)
+//设置一个监听函数，监听state状态的变化
+function render(){
+    const WeaponState=store.getState()
+    console.log(WeaponState)
+}
+//利用store.subscribe()函数订阅一下
+store.subscribe(render);//注意，监听函数的位置
+store.dispatch({type:HAND_IN_WEAPON});
+
+store.dispatch({type:APPLY_FOR_WEAPON});
+
+store.dispatch({type:APPLY_FOR_WEAPON});
+
+
+```
+* 上述一段代码主要是简单的阐述一下，就单单redux来管理自己的数据，大致过程是：
+1、通过reducer新建一个store，其中reducer是根据旧的状态和action生成新的state
+2、通过dispatch派发事件，传递action
+3、通过subscribe订阅事件，subscribe订阅render()函数，每次修改状态都会重新渲染
+
+# 手动链接react和redux
+1、将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
+```js
+const HAND_IN_WEAPON = "HAND_IN_WEAPON";
+const APPLY_FOR_WEAPON = "APPLY_FOR_WEAPON";
+
+//reducer
+export function counter(state=10,action){
+    switch(action.type) {
+        case HAND_IN_WEAPON:
+            return state-1
+            break;
+        case APPLY_FOR_WEAPON:
+            return state+1
+        default:
+        return state
+    }
+}
+
+
+//action creator
+export function handin(){
+    return {type: HAND_IN_WEAPON}
+}
+export function apply(){
+    return {type: APPLY_FOR_WEAPON}
+}
+```
+2、在入口文件中index.js（这个并不是本项目现在的这个入口文件，他只是我举的一个例子）引入App.rudex.js，以及createStore;通过reducer以及createStore创建一个store，传入到子组件(App)中，让其作为props的一个属性值，关键代码如下：
+```js
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { createStore } from 'redux';
+//reducers
+import { counter ,handin,apply } from './weapon.redux';
+
+const store = createStore(counter);
+
+
+function render(){
+    ReactDOM.render(
+      <App store={store}/>,
+      document.getElementById('root')
+    );
+}
+render();
+store.subscribe(render)
+
+
+
+//App.js
+import React, { Component } from 'react';
+// import logo from './logo.svg';
+import {handin,apply } from './weapon.redux';
+
+
+class App extends Component {
+  constructor(props){
+    super(props)
+  }
+  render() {
+    const store = this.props.store;
+    const num = store.getState();
+    console.log(num);
+    return (
+      <div>
+        <div>我们现在有武器{ num }把</div>
+        <br/>
+        <br/>
+        <button onClick={()=>store.dispatch(handin())}>上交武器</button>
+        <button onClick={()=>store.dispatch(apply())}>申请武器</button>
+        <button>延迟上交武器</button>
+      </div>
+    );
+  }
+}
+
+export default App;
+至此，已经手动连接了react和redux;但是并不是很优雅，因此需要安装react-redux，该插件可优雅的链接react和redux;该插件提供两个比较好用的组件Provider和connect;
+将上面的index.js和App.js这两个文件更新如下：
+```js
+// index.js
+
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { createStore } from 'redux';
+import { Provider } from 'react-redux';
+//reducers
+import { counter } from './weapon.redux';
+
+const store = createStore(counter );
+
+ReactDOM.render(
+  (<Provider store={store}>
+      <App />
+  </Provider>),
+  document.getElementById('root')
+);
+
+//App.js
+import React, { Component } from 'react';
+// import logo from './logo.svg';
+import {handin,apply } from './weapon.redux';
+import { connect } from 'react-redux'
+
+
+class App extends Component {
+  constructor(props){
+    super(props)
+  }
+  render() {
+    // console.log(this.props.num);
+    return (
+      <div>
+        <div>我们现在有武器{ this.props.num }把</div>
+        <br/>
+        <br/>
+        <button onClick={this.props.handin}>上交武器</button>
+        <button onClick={this.props.apply}>申请武器</button>
+        <button>延迟上交武器</button>
+      </div>
+    );
+  }
+}
+function mapStateToProps(state){
+  return {num: state}
+}
+const actionCreators = {handin,apply};
+App=connect(
+  mapStateToProps,
+  actionCreators
+)(App)
+export default App;
+
+
+
+总结一下工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
+reducers
+
 # App实现过程
 ## 登录注册页面
   1、首先，在入口文件中设置好相应的路由，已经对应的组件（登录，注册）
@@ -111,8 +303,9 @@ componentDidMount(){
     })
 }
 #### 后端用户信息模拟
-因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一个范例
-```user.js
+因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一部分
+
+``` js
 const express = require('express')
 const Router = express.Router()
 Router.get('/info',function(req,res){
@@ -137,17 +330,11 @@ app.use('user',userRouter)
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
 - [connect 装饰器](#connect)
-  - [Updating to New Releases](#updating-to-new-releases)
-  - [Sending Feedback](#sending-feedback)
-  - [Folder Structure](#folder-structure)
-  - [Available Scripts](#available-scripts)
-    - [`npm start`](#npm-start)
-    - [`npm test`](#npm-test)
-    - [`npm run build`](#npm-run-build)
-    - [`npm run eject`](#npm-run-eject)
-  - [Supported Language Features and Polyfills](#supported-language-features-and-polyfills)
-  - [Syntax Highlighting in the Editor](#syntax-highlighting-in-the-editor)
-  - [Displaying Lint Output in the Editor](#displaying-lint-output-in-the-editor)
+- [App实现过程](#app)
+  - [登录注册页面](#)
+    - [登录组件](#)
+    - [注册组件](#)
+    - [判断路由组件（AuthRoute）](#authroute)
   - [Debugging in the Editor](#debugging-in-the-editor)
   - [Changing the Page `<title>`](#changing-the-page-title)
   - [Installing a Dependency](#installing-a-dependency)
