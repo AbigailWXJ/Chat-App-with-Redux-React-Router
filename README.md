@@ -200,7 +200,7 @@ class App extends Component {
     );
   }
 }
-
+```
 export default App;
 至此，已经手动连接了react和redux;但是并不是很优雅，因此需要安装react-redux，该插件可优雅的链接react和redux;该插件提供两个比较好用的组件Provider和connect;
 将上面的index.js和App.js这两个文件更新如下：
@@ -258,7 +258,7 @@ App=connect(
   actionCreators
 )(App)
 export default App;
-
+```
 
 
 总结一下工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
@@ -302,10 +302,11 @@ componentDidMount(){
     }
     })
 }
+```
 #### 后端用户信息模拟
 因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一部分
 
-``` js
+```js
 const express = require('express')
 const Router = express.Router()
 Router.get('/info',function(req,res){
@@ -314,11 +315,11 @@ Router.get('/info',function(req,res){
 module.exports = Router
 ```
 又因为Express可以使用use（）处理中间件，因此可在后端入口文件server.js中利用use方法，设置一个url和对应的子路由名，用于获得用户信息
-```server.js
+```js
 const express = require('express')
 const userRouter = require('./user')
 app.use('user',userRouter)
-
+```
 
 
 ## Table of Contents
@@ -330,11 +331,26 @@ app.use('user',userRouter)
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
 - [connect 装饰器](#connect)
+- [redux基础准备](#redux)
+- [手动链接react和redux](#reactredux)
 - [App实现过程](#app)
   - [登录注册页面](#)
     - [登录组件](#)
     - [注册组件](#)
     - [判断路由组件（AuthRoute）](#authroute)
+      - [后端用户信息模拟](#)
+  - [Table of Contents](#table-of-contents)
+  - [Updating to New Releases](#updating-to-new-releases)
+  - [Sending Feedback](#sending-feedback)
+  - [Folder Structure](#folder-structure)
+  - [Available Scripts](#available-scripts)
+    - [`npm start`](#npm-start)
+    - [`npm test`](#npm-test)
+    - [`npm run build`](#npm-run-build)
+    - [`npm run eject`](#npm-run-eject)
+  - [Supported Language Features and Polyfills](#supported-language-features-and-polyfills)
+  - [Syntax Highlighting in the Editor](#syntax-highlighting-in-the-editor)
+  - [Displaying Lint Output in the Editor](#displaying-lint-output-in-the-editor)
   - [Debugging in the Editor](#debugging-in-the-editor)
   - [Changing the Page `<title>`](#changing-the-page-title)
   - [Installing a Dependency](#installing-a-dependency)
