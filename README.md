@@ -18,11 +18,11 @@ nodemon.js
   Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
   mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
 # 前后端端口不一致的解决方法
-  1、 在webpack-dev-derver的proxy的属性中配置允许的路由接口
-  2、 在package.ison文件中配置proxy;（本项目中使用）
-  3、 还可以使用jsonp的形式，解决跨域的问题;
-   Jsonp的优点：它不行XMLHttpRequest对象实现的Ajax请求那样收到同源策略的限制;它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持;并且在请求完毕后可以通过调用callback的方式回传结果。
-   JSONP的缺点：他只支持GET请求而不支持POST等其他类型的HTTP请求，且只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间进行JavaScript调用的问题
+  1. 在webpack-dev-derver的proxy的属性中配置允许的路由接口
+  2. 在package.ison文件中配置proxy;（本项目中使用）
+  3. 还可以使用jsonp的形式，解决跨域的问题;
+  * Jsonp的优点：它不行XMLHttpRequest对象实现的Ajax请求那样收到同源策略的限制;它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持;并且在请求完毕后可以通过调用callback的方式回传结果。
+  * JSONP的缺点：他只支持GET请求而不支持POST等其他类型的HTTP请求，且只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间进行JavaScript调用的问题
 ```js
   const express = require('express');//引入express模块
   const mongoose = require('mongoose'); //引入mongoose模块
@@ -77,7 +77,7 @@ nodemon.js
   },
 ```
 # redux基础准备
-1、 在搭配好的环境中，先手动实现redux，数据管理，粗糙代码如下：
+1. 在搭配好的环境中，先手动实现redux，数据管理，粗糙代码如下：
 ```js
 import { createStore } from 'redux';
 //action.type
@@ -118,12 +118,12 @@ store.dispatch({type:APPLY_FOR_WEAPON});
 
 ```
 * 上述一段代码主要是简单的阐述一下，就单单redux来管理自己的数据，大致过程是：
-1、 通过reducer新建一个store，其中reducer是根据旧的状态和action生成新的state
-2、 通过dispatch派发事件，传递action
-3、 通过subscribe订阅事件，subscribe订阅render()函数，每次修改状态都会重新渲染
+1. 通过reducer新建一个store，其中reducer是根据旧的状态和action生成新的state
+2. 通过dispatch派发事件，传递action
+3. 通过subscribe订阅事件，subscribe订阅render()函数，每次修改状态都会重新渲染
 
 # 手动链接react和redux
-1、 将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
+1. 将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
 ```js
 const HAND_IN_WEAPON = "HAND_IN_WEAPON";
 const APPLY_FOR_WEAPON = "APPLY_FOR_WEAPON";
@@ -150,7 +150,7 @@ export function apply(){
     return {type: APPLY_FOR_WEAPON}
 }
 ```
-2、 在入口文件中index.js（这个并不是本项目现在的这个入口文件，他只是我举的一个例子）引入App.rudex.js，以及createStore;通过reducer以及createStore创建一个store，传入到子组件(App)中，让其作为props的一个属性值，关键代码如下：
+2. 在入口文件中index.js（这个并不是本项目现在的这个入口文件，他只是我举的一个例子）引入App.rudex.js，以及createStore;通过reducer以及createStore创建一个store，传入到子组件(App)中，让其作为props的一个属性值，关键代码如下：
 ```js
 //index.js
 import React from 'react';
@@ -266,19 +266,19 @@ reducers
 
 # App实现过程
 ## 登录注册页面
-  1、 首先，在入口文件中设置好相应的路由，已经对应的组件（登录，注册）
-  2、 然后分别实现两个基本组件，分别作为登录组件和注册组件，并且跑通;
-  3、 因为登录和注册两个组件都有一个logo，因此将其抽离出来，实现为一个logo组件，使其可复用;
+  1. 首先，在入口文件中设置好相应的路由，已经对应的组件（登录，注册）
+  2. 然后分别实现两个基本组件，分别作为登录组件和注册组件，并且跑通;
+  3. 因为登录和注册两个组件都有一个logo，因此将其抽离出来，实现为一个logo组件，使其可复用;
 ### 登录组件
   接着上面，在登录页面的logo下面实现登录输入和登录按钮;
-  1、 从antd-mobile这个第三方库中，引入一些使用的组件，比如，List，InputItem，Button，WingBlank，WhiteSpace
-  2、 用List包裹InputIntem以实现登录的输入的用户名和密码这两个输入框
-  3、 在注册的Button上绑定跳转函数，使其可以跳转到注册页面;因为登录组件和注册组件是路由组件，因此可用histroy.push()实现页面的跳转
+  1. 从antd-mobile这个第三方库中，引入一些使用的组件，比如，List，InputItem，Button，WingBlank，WhiteSpace
+  2. 用List包裹InputIntem以实现登录的输入的用户名和密码这两个输入框
+  3. 在注册的Button上绑定跳转函数，使其可以跳转到注册页面;因为登录组件和注册组件是路由组件，因此可用histroy.push()实现页面的跳转
 ### 注册组件
-  1、 大部分和登录组件一样，只是多了一个身份选择，因此引入一个组件样式Radio，用其对应的标签RadioItem实现身份的包裹;
-  2、 在这里，我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
-  3、 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件
-  4、 注册请求的发送：
+  1. 大部分和登录组件一样，只是多了一个身份选择，因此引入一个组件样式Radio，用其对应的标签RadioItem实现身份的包裹;
+  2. 在这里，我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
+  3. 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件
+  4. 注册请求的发送：
   * 通过redux管理数据;
   * action暂时有注册成功，注册失败两个action
     这里是否注册成功，以及注册失败都是通过获取后端的信息参数来决定的，因此格外需要一个action creator返回一个函数来处理异步请求
