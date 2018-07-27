@@ -17,12 +17,7 @@ nodemon.js
 * Express+Mongodb
   Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
   mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
-# 前后端端口不一致的解决方法
-  1. 在webpack-dev-derver的proxy的属性中配置允许的路由接口
-  2. 在package.ison文件中配置proxy;（本项目中使用）
-  3. 还可以使用jsonp的形式，解决跨域的问题;
-  * Jsonp的优点：它不行XMLHttpRequest对象实现的Ajax请求那样收到同源策略的限制;它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持;并且在请求完毕后可以通过调用callback的方式回传结果。
-  * JSONP的缺点：他只支持GET请求而不支持POST等其他类型的HTTP请求，且只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间进行JavaScript调用的问题
+
 ```js
   const express = require('express');//引入express模块
   const mongoose = require('mongoose'); //引入mongoose模块
@@ -51,6 +46,23 @@ nodemon.js
      console.log(doc)
     })
 ```
+# 前后端端口不一致的解决方法
+  1. 在webpack-dev-derver的proxy的属性中配置允许的路由接口
+  2. 在package.ison文件中配置proxy;（本项目中使用）
+  3. 还可以使用jsonp的形式，解决跨域的问题;
+  * Jsonp的优点：它不像XMLHttpRequest对象实现的Ajax请求那样受到同源策略的限制;它的兼容性更好，在更加古老的浏览器中都可以运行，不需要XMLHttpRequest或ActiveX的支持;并且在请求完毕后可以通过调用callback的方式回传结果。
+  * JSONP的缺点：他只支持GET请求而不支持POST等其他类型的HTTP请求，且只支持跨域HTTP请求这种情况，不能解决不同域的两个页面之间进行JavaScript调用的问题
+  * json 和 jsonp这两个虽然只有一个字母的差别，但其实它们根本不是一回事;json是一种数据格式（即描述信息的格式），而jsonp是一种非官方的跨域数据交互协议（即信息传递双方约定的方法）;
+  ** json的优点：
+  1. 基于纯文本，跨平台传递及其简单;
+  2. Javascript原生支持，后台语言几乎全部支持;
+  3. 轻量级数据格式，占用字符数量极少，特别适合互联网传递;
+  4. 可读性较强
+  5. 容易编写和解析，但前提是你要知道数据结构
+  json使用Javascript语法的子集表示对象，数组、布尔值、字符串、数值和null。
+
+  * jsonp(一种非正式传输协议)，该协议的一个要点就是允许用户传递一个callback参数给服务端，然后服务端返回数据时会将这个callback参数作为函数名来包裹住json数据，这样客户端就可以随意定制自己的函数来自动处理返回的数据
+  
 # antd-mobile插件
 [官网链接](https://mobile.ant.design/index-cn)
 为了实现按需加载的功能，安装插件babel-plugin-import，并在package.json文件中进行配置
