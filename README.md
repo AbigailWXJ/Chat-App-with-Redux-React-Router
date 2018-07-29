@@ -79,15 +79,6 @@ nodemon.js
     ]
 }
 ```
-# connect 装饰器
-使用connect装饰器的形式，需要安装一个装饰器插件babel-plugin-transform-decorators-legacy，
-```json
-"babel": {
-    "plugins": [
-      "transform-decorators-legacy"
-    ]
-  },
-```
 # redux基础准备
 1. 在搭配好的环境中，先手动实现redux，数据管理，粗糙代码如下：
 ```js
@@ -134,6 +125,10 @@ store.dispatch({type:APPLY_FOR_WEAPON});
 2. 通过dispatch派发事件，传递action
 3. 通过subscribe订阅事件，subscribe订阅render()函数，每次修改状态都会重新渲染
 
+* 补充：如果全局属性较多，即对不同的全局属性有不同的reduce的时候，此时，需要一个combinReducer将所有的reducer合并起来，形成reducers，传给createrStore函数用于生成store。
+
+总结一下redux工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
+
 # 手动链接react和redux
 1. 将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
 ```js
@@ -162,7 +157,7 @@ export function apply(){
     return {type: APPLY_FOR_WEAPON}
 }
 ```
-2. 在入口文件中index.js（这个并不是本项目现在的这个入口文件，他只是我举的一个例子）引入App.rudex.js，以及createStore;通过reducer以及createStore创建一个store，传入到子组件(App)中，让其作为props的一个属性值，关键代码如下：
+2. 在入口文件中index.js（这个并不是本项目现在的这个入口文件，只是我举的一个例子）引入App.rudex.js，以及createStore;通过reducer以及createStore创建一个store，传入到子组件(App)中，让其作为props的一个属性值，关键代码如下：
 ```js
 //index.js
 import React from 'react';
@@ -214,6 +209,7 @@ class App extends Component {
 }
 ```
 export default App;
+# 使用react-redux插件来优雅的连接react和redux
 至此，已经手动连接了react和redux;但是并不是很优雅，因此需要安装react-redux，该插件可优雅的链接react和redux;该插件提供两个比较好用的组件Provider和connect;
 将上面的index.js和App.js这两个文件更新如下：
 ```js
@@ -272,9 +268,183 @@ App=connect(
 export default App;
 ```
 
+* 在使用react-redux插件后，下面实现异步处理
+比如说，实现一个1s或几秒过后在执行的一个action
+由于异步处理action creator返回的是一个函数，并不是一个对象;但是createStore只能处理对象;因此，需要一个插件redux-thunk来实现异步处理，同时也需要一个中间件来对thunk进行开启;有了异步处理插件之后，Action就可以返回函数，并使用dispatch提交action，则上面的代码更新为：
+```js
+//index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { createStore, applyMiddleware} from 'redux';//改动的部分
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';//改动的部分
+//reducers
+import { counter } from './weapon.redux';
 
-总结一下工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
-reducers
+
+const store = createStore(counter,applyMiddleware(thunk));//改动的部分
+
+ReactDOM.render(
+  (<Provider store={store}>
+      <App />
+  </Provider>),
+  document.getElementById('root')
+);
+
+//App.js
+
+import React, { Component } from 'react';
+// import logo from './logo.svg';
+import {handin,apply,handinAsyn } from './weapon.redux';//改动的部分
+import { connect } from 'react-redux'
+
+
+class App extends Component {
+  constructor(props){
+    super(props)
+  }
+  render() {
+    // console.log(this.props.num);
+    return (
+      <div>
+        <div>我们现在有武器{ this.props.num }把</div>
+        <br/>
+        <br/>
+        <button onClick={this.props.handin}>上交武器</button>
+        <button onClick={this.props.apply}>申请武器</button>
+        <button onClick={this.props.handinAsyn}>延迟上交武器</button>//改动的部分
+      </div>
+    );
+  }
+}
+function mapStateToProps(state){
+  return {num: state}
+}
+const actionCreators = {handin,apply,handinAsyn};//改动的部分
+App=connect(
+  mapStateToProps,
+  actionCreators
+)(App)
+export default App;
+
+//App.redux.js
+const HAND_IN_WEAPON = "HAND_IN_WEAPON";
+const APPLY_FOR_WEAPON = "APPLY_FOR_WEAPON";
+
+//reducer
+export function counter(state=10,action){
+    switch(action.type) {
+        case HAND_IN_WEAPON:
+            return state-1
+            break;
+        case APPLY_FOR_WEAPON:
+            return state+1
+        default:
+        return state
+    }
+}
+
+
+//action creator
+export function handin(){
+    return {type: HAND_IN_WEAPON}
+}
+export function apply(){
+    return {type: APPLY_FOR_WEAPON}
+}
+//改动的部分
+export function handinAsyn(){
+    return dispatch=>{
+        setTimeout(()=>{
+            dispatch(handin())
+        },2000)
+    }
+}
+```
+* redux的调试工具Chrome中添加Redux DevTools
+使用步骤：
+1. 在新建store的时候判断window.devToolsExtension
+2. 使用compose结合thunk和window.devToolsExtension(compose函数对多个函数进行组合)
+3. 就可以在调试窗的redux选项卡里，实时看到stateconst
+
+相应的index.js改为：
+```js
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './App';
+import { createStore, applyMiddleware ,compose} from 'redux';
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk'
+//reducers
+import { counter } from './weapon.redux';
+
+const reduxDevtools = window.devToolsExtension ? window.devToolsExtension() : f=>f
+const store = createStore(counter,compose(
+    applyMiddleware(thunk),
+    reduxDevtools
+    )
+);
+
+ReactDOM.render(
+  (<Provider store={store}>
+      <App />
+  </Provider>),
+  document.getElementById('root')
+);
+
+```
+# 使用connect装饰器
+1. 安装一个插件 babel-plugin-transform-decorators-legacy (开发的时候用);
+2. 在package.json文件中进行配置
+```json
+"babel": {
+    "presets": [
+      "react-app"
+    ],
+    "plugins": ["transform-decorators-legacy"]//添加的部分
+  },
+
+  ```
+  App.js更新为：
+//App.js
+import React, { Component } from 'react';
+// import logo from './logo.svg';
+import {handin,apply,handinAsyn } from './weapon.redux';
+import { connect } from 'react-redux'
+
+@connect(
+  //你要state什么属性放到props里
+  state=>({num:state}),
+  //你要什么方法，放到props里，自动dispatch
+  {handin,apply,handinAsyn})
+class App extends Component {
+  constructor(props){
+    super(props)
+  }
+  render() {
+    // console.log(this.props.num);
+    return (
+      <div>
+        <div>我们现在有武器{ this.props.num }把</div>
+        <br/>
+        <br/>
+        <button onClick={this.props.handin}>上交武器</button>
+        <button onClick={this.props.apply}>申请武器</button>
+        <button onClick={this.props.handinAsyn}>延迟上交武器</button>
+      </div>
+    );
+  }
+}
+
+// App=connect(
+//   mapStateToProps,
+//   actionCreators
+// )(App)
+export default App;
+
+
+
 
 # App实现过程
 ## 登录注册页面
