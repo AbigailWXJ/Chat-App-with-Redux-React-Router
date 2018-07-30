@@ -101,7 +101,6 @@ function counter(state=10,action){
 }
 //通过reducer建立store
 const store = createStore(counter);
-Redux.jsre
 //利用store.getState()得到状态
 const WeaponState=store.getState();
 console.log(WeaponState)
@@ -177,9 +176,7 @@ function render(){
     );
 }
 render();
-store.subscribe(render)
-
-
+store.subscribe(render
 
 //App.js
 import React, { Component } from 'react';
@@ -407,6 +404,7 @@ ReactDOM.render(
 
   ```
   App.js更新为：
+  ```js
 //App.js
 import React, { Component } from 'react';
 // import logo from './logo.svg';
@@ -436,13 +434,12 @@ class App extends Component {
     );
   }
 }
-
 // App=connect(
 //   mapStateToProps,
 //   actionCreators
 // )(App)
 export default App;
-
+```
 
 
 
@@ -512,9 +509,10 @@ app.use('user',userRouter)
 - [前期项目准备](#)
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
-- [connect 装饰器](#connect)
 - [redux基础准备](#redux)
 - [手动链接react和redux](#reactredux)
+- [使用react-redux插件来优雅的连接react和redux](#react-reduxreactredux)
+- [使用connect装饰器](#connect)
 - [App实现过程](#app)
   - [登录注册页面](#)
     - [登录组件](#)
