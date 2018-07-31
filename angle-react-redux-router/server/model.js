@@ -3,7 +3,7 @@ const mongoose = require('mongoose'); //引入mongoose模块
 
 // 链接mongo（在这里是本地链接）
 // const DB_URL = 'mongodb://localhost:27017';
-// 链接并使用imooc这个集合 如果没有有imooc-chat这个集合，会自动新建一个
+// 链接并使用imooc-chat这个集合 如果没有有imooc-chat这个集合，会自动新建一个
 const DB_URL = 'mongodb://localhost:27017/imooc-chat';
 mongoose.connect(DB_URL);//连接
 const models={

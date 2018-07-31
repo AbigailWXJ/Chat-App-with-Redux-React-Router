@@ -82,7 +82,7 @@ Router.post('/login',function(req,res){
     })
 })
 Router.post('/register',function(req,res){
-    console.log(req.body);
+    console.log(req.body);//req.body是传过来的参数,即从前端传过来的请求
     const user=req.body.user;
     const pwd=req.body.pwd;
     const type=req.body.type;

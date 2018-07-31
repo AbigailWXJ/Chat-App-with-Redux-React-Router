@@ -15,8 +15,8 @@ nodemon.js
 ```
 # 前期项目准备
 * Express+Mongodb
-  Express开发Web接口，使用nodejs的mongoose模块链接和操作mongodb
-  mongoose类似与Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
+  Express开发Web接口，通过使用nodejs的mongoose模块链接和操作mongodb;即通过mongoose操作mongodb，mogodb存储的就是json数据，相对与Mysql要容易的的多
+  mongoose类似于Mysql的形式，也有文档、字段的概念，也有常用的増删改查方法
 
 ```js
   const express = require('express');//引入express模块
@@ -46,6 +46,12 @@ nodemon.js
      console.log(doc)
     })
 ```
+* 为什么选择mogoDB这个数据库
+1. 无数据结构的限制
+    没有表结构的概念，每条记录可以有完全不同的结构;业务开发方便快捷;sql数据库需要事先定义表结构
+2. 完全的索引支持
+3. 方便扩展
+4. 具有完善的文档支持
 # 前后端端口不一致的解决方法
   1. 在webpack-dev-derver的proxy的属性中配置允许的路由接口
   2. 在package.ison文件中配置proxy;（本项目中使用）
@@ -409,7 +415,7 @@ ReactDOM.render(
 import React, { Component } from 'react';
 // import logo from './logo.svg';
 import {handin,apply,handinAsyn } from './weapon.redux';
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
 
 @connect(
   //你要state什么属性放到props里
@@ -445,7 +451,7 @@ export default App;
 
 # App实现过程
 ## 登录注册页面
-  1. 首先，在入口文件中设置好相应的路由，已经对应的组件（登录，注册）
+  1. 首先，在入口文件中设置好相应的路由，以及对应的组件（登录，注册）
   2. 然后分别实现两个基本组件，分别作为登录组件和注册组件，并且跑通;
   3. 因为登录和注册两个组件都有一个logo，因此将其抽离出来，实现为一个logo组件，使其可复用;
 ### 登录组件
@@ -455,12 +461,173 @@ export default App;
   3. 在注册的Button上绑定跳转函数，使其可以跳转到注册页面;因为登录组件和注册组件是路由组件，因此可用histroy.push()实现页面的跳转
 ### 注册组件
   1. 大部分和登录组件一样，只是多了一个身份选择，因此引入一个组件样式Radio，用其对应的标签RadioItem实现身份的包裹;
-  2. 在这里，我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
-  3. 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件
-  4. 注册请求的发送：
+  2. 在这里（目前），我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
+  3. 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件，因此在注册页面输入完成以后，可以把状态存储在state里面。
+  ```js
+import React from 'react';
+import Logo from '../../component/logo/logo';
+import {List, InputItem,Radio, WhiteSpace,Button} from 'antd-mobile';
+
+class Register extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+          user: '',
+          pwd: '',
+          repeatpwd: '',
+          type: 'genius'
+        }
+        this.handleRegister=this.handleRegister.bind(this)
+    }
+    handleChange(key,val){
+      this.setState({
+        [key]:val   //注意这里一定要使用方括号
+        })
+    }
+    handleRegister(){
+        console.log(this.state)
+    }
+    render(){
+        const RadioItem=Radio.RadioItem;
+        return (
+            <div>
+            <Logo></Logo>
+                <List>
+                    <InputItem onChange={v=>this.handleChange('user',v)}> User Name </InputItem>
+                    <WhiteSpace></WhiteSpace>
+                    <InputItem type='password' onChange={v=>this.handleChange('pwd',v)}> Set password </InputItem>
+                    <WhiteSpace ></WhiteSpace>
+                    <InputItem type='password' onChange={v=>this.handleChange('repeatpwd',v)}> Confirm password </InputItem>
+                    <WhiteSpace></WhiteSpace>
+                    <RadioItem 
+                    checked={this.state.type==='genius'}
+                    onChange={()=>this.handleChange('type','genius')}>Niu Ren</RadioItem>
+                    <WhiteSpace></WhiteSpace>
+                    <RadioItem
+                    checked={this.state.type==='BOSS'}
+                    onChange={()=>this.handleChange('type','boss')}>BOSS</RadioItem>
+                    <Button type='primary' onClick={this.handleRegister}>REGUSTER</Button>
+                </List>
+            </div>)
+    }
+export default Register
+```
+  4. 注册请求的发送：(发送给服务器)通过redux实现一个提交注册信息的功能
   * 通过redux管理数据;
   * action暂时有注册成功，注册失败两个action
     这里是否注册成功，以及注册失败都是通过获取后端的信息参数来决定的，因此格外需要一个action creator返回一个函数来处理异步请求
+```js
+import axios from 'axios';
+const REGISTER_SUCCESS='REGISTER_SUCCESS';
+const ERROR_MSG='ERROR_MSG';
+
+const initState={
+  isAuth:false,
+  msg:'',
+  user:'',
+  pwd:'',
+  type:''
+}//初始状态
+//创建了一个名叫user的reducer
+export function user(state=initState,action){
+    switch(action.type){
+        case REGISTER_SUCCESS:
+             return {...state,msg:'',isAuth: true,...action.payload}
+        case ERROR_MSG:
+            return {...state,isAuth:false,msg:action.msg}
+        default:
+            return state
+
+    }
+}
+
+function registerSuccess(data){
+  return {type:REGISTER_SUCCESS,payload: data}
+}
+function errorMsg(msg) {
+  return {msg, type: ERROR_MSG }//注意这里msg其实是msg：msg的缩写，缩写后，需要放在最前面
+}
+
+export function register ({user,pwd,repeatpwd,type}){
+  if(!user||!pwd||!type) {
+    return errorMsg('用户名密码必须输入')
+  }
+  if(pwd!==repeatpwd) {
+    return errorMsg('密码和确认密码不同')
+  }
+  return dispatch=>{
+    axios.post('/user/register',{user,pwd,type})//向后端发送请求，将用户输入的数据全部传给后端
+    .then(res=>{
+      if(res.status==200 && res.data.code===0){
+        dispatch(registerSuccess({user,pwd,type}))
+      }else {
+        dispatch(errorMsg(res.data.msg))
+      }
+      })
+  }
+}
+```
+1. 下一步就是向后台提交数据(post)
+由第四步可知，通过该reducer创建的store中的初始状态值为initState，为了实现将注册页面保存的状态传到后端，这里将名为register的异步action creator通过connect组件传递给注册组件，因此，在点击注册按钮的时候，就将注册页面的信息传递给register函数，实现向后台提交数据，更新register.js如下：
+```js
+import {connect} from 'react-redux';//新加的
+import {register} from '../../reduxs/user.redux';//新加的
+import React from 'react';
+import Logo from '../../component/logo/logo';
+import {List, InputItem,Radio, WhiteSpace,Button} from 'antd-mobile';
+
+@connect(
+    state=>state.user,
+    {register}
+)//新加的
+class Register extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+          user: '',
+          pwd: '',
+          repeatpwd: '',
+          type: 'genius'
+        }
+        this.handleRegister=this.handleRegister.bind(this)
+    }
+    handleChange(key,val){
+      this.setState({
+        [key]:val   //注意这里一定要使用方括号
+        })
+    }
+    handleRegister(){
+        this.props.register(this.state)//在这里实现了数据的提交
+    }
+    render(){
+        const RadioItem=Radio.RadioItem;
+        return (
+            <div>
+            <Logo></Logo>
+                <List>
+                    {this.props.msg? <p className="error-msg">{this.props.msg}</p>: null}//新加的一个简单的报错信息
+
+                    <InputItem onChange={v=>this.handleChange('user',v)}> User Name </InputItem>
+                    <WhiteSpace></WhiteSpace>
+                    <InputItem type='password' onChange={v=>this.handleChange('pwd',v)}> Set password </InputItem>
+                    <WhiteSpace ></WhiteSpace>
+                    <InputItem type='password' onChange={v=>this.handleChange('repeatpwd',v)}> Confirm password </InputItem>
+                    <WhiteSpace></WhiteSpace>
+                    <RadioItem 
+                    checked={this.state.type==='genius'}
+                    onChange={()=>this.handleChange('type','genius')}>Niu Ren</RadioItem>
+                    <WhiteSpace></WhiteSpace>
+                    <RadioItem
+                    checked={this.state.type==='BOSS'}
+                    onChange={()=>this.handleChange('type','boss')}>BOSS</RadioItem>
+                    <Button type='primary' onClick={this.handleRegister}>REGUSTER</Button>
+                </List>
+            </div>)
+    }
+}
+export default Register
+```
+因为要想后端提交数据，需要准备redux，express，mongodb;故接下来主要实现后端的express和mongodb;
 ### 判断路由组件（AuthRoute）
 因为需要根据身份，登录的状态，以及当前所处的位置进行检测，并作相应的跳转，比较麻烦，所以单独抽离出一个组件AuthRoute;<br />
 该组件的目的主要是用于获取用户信息，并根据信息做相应的跳转;<br />
@@ -483,13 +650,13 @@ componentDidMount(){
 }
 ```
 #### 后端用户信息模拟
-因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一部分
+因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;此外，又因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一部分
 
 ```js
 const express = require('express')
 const Router = express.Router()
 Router.get('/info',function(req,res){
-  return res.json({code:1})
+  return res.json({code:1})//code为1表示获取信息未成功
   })
 module.exports = Router
 ```
@@ -499,8 +666,42 @@ const express = require('express')
 const userRouter = require('./user')
 app.use('user',userRouter)
 ```
+* 通过mongodb实现数据模型model.js文件
+```js
+'use strict'
+const mongoose = require('mongoose'); //引入mongoose模块
 
-
+// 链接并使用imooc-chat这个集合 如果没有有imooc-chat这个集合，会自动新建一个
+const DB_URL = 'mongodb://localhost:27017/imooc-chat';
+mongoose.connect(DB_URL);//连接
+const models={
+    user:{
+        'user': {'type':String,'require': true},
+        'pwd': {'type': String,'require': true},
+        'type': {'type':String,'require':true},
+        //头像
+        'avatar': {'type':String},
+        // 个人简介或者职位简介
+        'desc': {'type':String},
+        //职位名
+        'title': {'type':String},
+        // 如果你是boss，还要加两个字段
+        'company': {'type':String},
+        'money': {'type':String}
+    },
+    chat: {
+    }
+}//设置相应的字段
+//批量动态的生成相应的模型，相应的文档名为models里面定义的key值
+for (let m in models){
+    mongoose.model(m,new mongoose.Schema(models[m]))
+}
+module.exports={
+    getModel: function(name){
+        return mongoose.model(name)
+    }
+}
+```
 ## Table of Contents
 
 - [项目安装](#)

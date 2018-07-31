@@ -1,7 +1,7 @@
 const express = require('express');//引入express模块
 const utils= require('utility');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');//用于post过来的json
+const cookieParser = require('cookie-parser');//用于解析cookie
 const model = require('./model');
 const Chat = model.getModel('chat');
 
