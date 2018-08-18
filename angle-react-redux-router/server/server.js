@@ -1,6 +1,6 @@
 const express = require('express');//引入express模块
 const utils= require('utility');
-const bodyParser = require('body-parser');//用于post过来的json
+const bodyParser = require('body-parser');//用于解析post过来的json
 const cookieParser = require('cookie-parser');//用于解析cookie
 const model = require('./model');
 const Chat = model.getModel('chat');
@@ -9,15 +9,16 @@ const Chat = model.getModel('chat');
 const app = express();//app是一个express实例
 //work with express
 const server=require('http').Server(app);
+
 const io=require('socket.io')(server);
 //io是全局的链接，传入的参数socket是当前的连接，io.on监听事件
 // data是传过来的数据，socket是当前的请求，io是全局的请求
 // 使用io将接收到的数据发送到全局
 io.on('connection',function(socket){
-    console.log('user login')
+    console.log('user login')//说明用户已经
     socket.on('sendmsg',function(data){
-        console.log(data);
-        io.emit('recvmsg',data)
+        // console.log(data);
+        io.emit('recvmsg',data)//发送全局事件
         const from=data.from
         const to=data.to
         const msg=data.msg

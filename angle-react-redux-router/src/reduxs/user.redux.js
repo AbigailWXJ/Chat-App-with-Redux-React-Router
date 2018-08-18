@@ -26,7 +26,7 @@ export function user(state=initState,action){
         case LOAD_DATA:
             return {...state,...action.payload}
         case ERROR_MSG:
-            return {...state,isAuth:false,msg:action.msg}
+            return {...state,msg:action.msg}
         case LOGOUT:
             return {...initState,redirectTo:'/login'}
         default:
@@ -34,7 +34,9 @@ export function user(state=initState,action){
 
     }
 }
-function authSuccess(data){
+function authSuccess(obj){
+    //过滤掉pwd字段
+    const {pwd,...data}=obj
     return {type:AUTH_SUCCESS,payload:data}
 }
 // function registerSuccess(data){
@@ -49,7 +51,7 @@ function errorMsg(msg){
 }
 //action creator
 export function loadData(userinfo){
-    console.log(loadData);
+    // console.log(loadData);
     return {type:LOAD_DATA,payload:userinfo}
 }
 export function logoutSubmit(){
@@ -62,7 +64,7 @@ export function update(data){
             if(res.status===200&&res.data.code===0){
                 dispatch(authSuccess(res.data.data))
             }else{
-                dispatch(errorMsg(res.data.data))
+                dispatch(errorMsg(res.data.msg))
             }
         })
     }
@@ -72,6 +74,7 @@ export function login({user,pwd}){
         return errorMsg('用户名密码必须输入')
     }
     return dispatch=>{
+        //axios发送一个post的请求，参数包括了user，pwd
         axios.post('user/login',{user,pwd}).then(res=>{
             if(res.status===200&&res.data.code===0){
                 // dispatch(loginSuccess(res.data.data))//后端返回回来的data，其中code表示状态码，msg表示错误消息，data具体的数据

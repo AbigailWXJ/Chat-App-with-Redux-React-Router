@@ -1,7 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import {getUserList} from '../../reduxs/chatUser.redux'
-import UserCard from '../usercar/usercard'
+import UserCard from '../usercard/usercard'
 @connect(
     state=>state.chatuser,
     {getUserList})

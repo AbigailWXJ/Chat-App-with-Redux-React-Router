@@ -416,7 +416,6 @@ import React, { Component } from 'react';
 // import logo from './logo.svg';
 import {handin,apply,handinAsyn } from './weapon.redux';
 import { connect } from 'react-redux';
-
 @connect(
   //你要state什么属性放到props里
   state=>({num:state}),
@@ -450,8 +449,19 @@ export default App;
 
 
 # App实现过程
+## 页面文件结构
+* 组件放在component文件夹下面
+* 页面（业务组件）放在container文件夹下面
+* 页面入口处获取用户信息，决定跳转到哪个页面
+# 开发模式
+* 基于cookie用户验证
+express依赖cookie-parser（插件），cookie类似于一张身份卡，登录后服务器端返回，你带着cookie就可以访问受限资源（比如：牛人列表和Boss列表，需要有对应的token才能看到）
 ## 登录注册页面
   1. 首先，在入口文件中设置好相应的路由，以及对应的组件（登录，注册）
+  ```js
+  <Route path='/login' component={Login}></Route>
+  <Route path='/register' component={Register}></Route>
+  ```
   2. 然后分别实现两个基本组件，分别作为登录组件和注册组件，并且跑通;
   3. 因为登录和注册两个组件都有一个logo，因此将其抽离出来，实现为一个logo组件，使其可复用;
 ### 登录组件
@@ -460,14 +470,13 @@ export default App;
   2. 用List包裹InputIntem以实现登录的输入的用户名和密码这两个输入框
   3. 在注册的Button上绑定跳转函数，使其可以跳转到注册页面;因为登录组件和注册组件是路由组件，因此可用histroy.push()实现页面的跳转
 ### 注册组件
-  1. 大部分和登录组件一样，只是多了一个身份选择，因此引入一个组件样式Radio，用其对应的标签RadioItem实现身份的包裹;
-  2. 在这里（目前），我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
-  3. 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件，因此在注册页面输入完成以后，可以把状态存储在state里面。
+1. 大部分和登录组件一样，只是多了一个身份选择，因此引入一个组件样式Radio，用其对应的标签RadioItem实现身份的包裹;
+2. 在这里（目前），我们的身份信息是注册组件自己的内部状态，还不是从后端选取的;
+3. 设定好注册页面的一些状态，这里有：用户名，密码，确认密码，身份这四个状态，然后在注册页面绑定相应的事件通过this.setState()修改状态以实现交互，这里使用的事件是onChange事件，因此在注册页面输入完成以后，可以把状态存储在state里面。
   ```js
 import React from 'react';
 import Logo from '../../component/logo/logo';
 import {List, InputItem,Radio, WhiteSpace,Button} from 'antd-mobile';
-
 class Register extends React.Component{
     constructor(props){
         super(props)
@@ -499,7 +508,7 @@ class Register extends React.Component{
                     <WhiteSpace ></WhiteSpace>
                     <InputItem type='password' onChange={v=>this.handleChange('repeatpwd',v)}> Confirm password </InputItem>
                     <WhiteSpace></WhiteSpace>
-                    <RadioItem 
+                    <RadioItem
                     checked={this.state.type==='genius'}
                     onChange={()=>this.handleChange('type','genius')}>Niu Ren</RadioItem>
                     <WhiteSpace></WhiteSpace>
@@ -512,7 +521,7 @@ class Register extends React.Component{
     }
 export default Register
 ```
-  4. 注册请求的发送：(发送给服务器)通过redux实现一个提交注册信息的功能
+4. 注册请求的发送：(发送给服务器)通过redux实现一个提交注册信息的功能
   * 通过redux管理数据;
   * action暂时有注册成功，注册失败两个action
     这里是否注册成功，以及注册失败都是通过获取后端的信息参数来决定的，因此格外需要一个action creator返回一个函数来处理异步请求
@@ -567,7 +576,7 @@ export function register ({user,pwd,repeatpwd,type}){
   }
 }
 ```
-1. 下一步就是向后台提交数据(post)
+5. 下一步就是向后台提交数据(post)
 由第四步可知，通过该reducer创建的store中的初始状态值为initState，为了实现将注册页面保存的状态传到后端，这里将名为register的异步action creator通过connect组件传递给注册组件，因此，在点击注册按钮的时候，就将注册页面的信息传递给register函数，实现向后台提交数据，更新register.js如下：
 ```js
 import {connect} from 'react-redux';//新加的
@@ -627,7 +636,29 @@ class Register extends React.Component{
 }
 export default Register
 ```
-因为要想后端提交数据，需要准备redux，express，mongodb;故接下来主要实现后端的express和mongodb;
+6. 向后端提交了数据之后，要实现跳转，也是由redux来进行跳转，因此在redux的初始状态中加入字段“redirectTo”;因为登录，注册后都要实现一个跳转;这个redirectTo是不能写死的，需要根据用户的身份以及信息是否完善的情况来进行跳转的，因此需要进行一些计算;因为大部分组件都涉及到路由的跳转，因此专门抽离出一个工具文件utils.js专门控制路由的跳转;
+```js
+//工具函数，专门用于页面跳转
+export function getRedirectPath({type,avatar}){
+    //根据用户信息。返回跳转页面地址
+    // 根据user.type 类型跳转到boss页面和genius页面
+    // 根据用户头像avatar 跳转到bossinfo /geniusinfo
+    // 
+    let url=(type==='boss')?'/boss':'/genius';
+    if(!avatar){
+        //表示没有头像信息，需要去完善用户信息（本项目中默认有了头像的情况，就代表已经完善了用户信息，就不需要跳转到完善信息页面去完善信息）
+        url +='info'
+    }
+    return url
+}
+export function getChatId(userId,targetId){
+    return [userId,targetId].sort().join('_')
+}
+```
+因此在注册组件的logo  前面加上一个判断路由的语句：
+{this.props.redirectTo ? <Redirect to={this.props.redirectTo}></Redirect> : null};
+相应的在登录组件前面也添加一句：{this.props.redirectTo&&this.props.redirectTo!=='/login' ? <Redirect to={this.props.redirectTo}></Redirect> : null}
+因为要向后端提交数据，需要准备redux，express，mongodb;故接下来主要实现后端的express和mongodb;
 ### 判断路由组件（AuthRoute）
 因为需要根据身份，登录的状态，以及当前所处的位置进行检测，并作相应的跳转，比较麻烦，所以单独抽离出一个组件AuthRoute;<br />
 该组件的目的主要是用于获取用户信息，并根据信息做相应的跳转;<br />
@@ -649,7 +680,7 @@ componentDidMount(){
     })
 }
 ```
-#### 后端用户信息模拟
+#### 后端用户信息模拟）
 因为AuthRoute组件需要获取用户的信息，因此需要先在后台模拟出用户的数据;此外，又因为与后端的数据交互交多，因此专门抽离出一个模块（user.js）,该模块放置的是与用户相关的express接口;如下是一个user.js的一部分
 
 ```js
@@ -702,6 +733,326 @@ module.exports={
     }
 }
 ```
+ * 引入了一个插件utility为cookie信息中的密码进行加密，也相应的进行了加盐操作
+ ```js
+ //该函数实现的功能是对加密进行加盐，使其变得更加难
+function md5Pwd(pwd){
+    const salt='xuejiao_is_great_678wxgywughd!@#RFDGFXJY~~' //这个可以自己定义
+    return utils.md5(utils.md5(pwd+salt))
+}
+```
+并且还在登录以及注册时进行post的时候，增加了查询条件（_filter），不希望密码被暴露出来！！！！
+最后，设置cookie，写cookie是在res中写，读cookie是在request中;
+## 完善信息（注册完之后）
+两个完善信息的页面有：boss完善信息页面和牛人完善信息页面
+首先，需要在入口文件设置相应的路由信息：
+```js
+<Route path='/bossinfo' component={BossInfo}></Route>
+<Route path='/geniusinfo' component={GeniusInfo}></Route>
+```
+### BOSS页面
+1. 引用NavBar从antd-mobile里面,作为完善信息页的Header
+2. 选择头像（因为BOSS页面和牛人页面都有选择头像，因此抽离出选择头像功能作为一个组件）
+3. 信息主要包括：招聘职位，公司名称，职位薪资，职位要求;主要从antd-mobile引入InputItem，和TextareaItem组件
+
+  #### 头像组件
+  1. 先从文件夹下，批量录入图片文件，并保存在一个变量中;
+  2. 并从antd-mobile引入Grid组件用来显示图片;Grid是以宫格的形式显示图片。
+  3. 给Grid添加onClick事件进行选择头像的交互;因此在Click事件中首先利用setState（）函数进行状态的改变，与此同时需要将选择的头像参数传给父组件传过来的函数，并且在这里使用了PropTypes插件来控制传入的参数的类型，即使用了属性类型校验
+  4. 因为选择了头像需要显示出已经选择了哪一个头像，如果未选择则显示提醒‘请选择头像’，故引入List从antd-mobile里面，并将Grid组件也包括在里面;
+4. 设置一个Button按钮，保存相应的用户信息，同时还是需要user.redux.js来管理，从user.redux.js里面传入一个update函数，用来传递用户完善的信息。
+更新user.redux.js,在这里重新将登录成功，注册成功，以及完善信息成功这三个状态统一为一个action：AUTH_SUCCESS，并创建一个名叫update的action来进行post传送数据，并在这里过滤了pwd字段，使其不显示
+### 牛人完善信息页面
+大致和BOSS完善信息一样，只是输入的字段有些不一样，具体过程和一样
+## 页面Dashboard
+首先，在入口文件index.js设置好相应的路由信息：
+```js
+<Route component={Dashboard}></Route>
+```
+因为牛人列表，BOSS列表，消息列表，个人中心这四个页面都有相同的骨架，因此将这些组件需要一个外部Router对这四个组件进行包裹，然后根据对应的具体路由进行跳转;因此，dashboard需要根据相应的path和当前的url（this.props.location）相比较来渲染出响应的列表信息。因此，对于牛人列表页面和Boss列表中有一个hide（隐藏）字段
+```js
+ render(){
+        const {pathname} = this.props.location//Dashboad是路由组件，不需要使用withRouter
+        const user = this.props.user //获取用户信息
+        // 定义了四个页面的相关路由信息，以及相应的信息
+        const navList=[
+            {
+                path:'/boss',
+                text:'牛人',//以boss身份进来的人，看到的是牛人列表
+                icon:'boss',//要渲染页面的图标
+                title:'牛人列表',//Header上面的title
+                component:Boss,//要渲染的组件的名称
+                hide:user.type==='genius'//不同的身份看到不同的页面，对于不让其看到的身份进行隐藏
+            },
+             {
+                path:'/genius',
+                text:'boss',//要查看的boss
+                icon:'job',
+                title:'BOSS列表',
+                component:Genius,
+                hide:user.type==='boss'
+            },
+             {
+                path:'/msg',
+                text:'消息',
+                icon:'msg',
+                title:'消息列表',
+                component:Msg,
+            },
+            {
+                path:'/me',
+                text:'我',
+                icon:'user',
+                title:'个人中心',
+                component:User,
+            }
+        ]
+        return (
+            <div>
+                <NavBar 
+                className='fixed-header'
+                mode='dark'
+                >{navList.find(v=>v.path===pathname).title}
+                </NavBar>
+                <div>
+                <Switch>
+                {
+                    navList.map(v=>(
+                        <Route key={v.path} path={v.path} component={v.component}></Route>
+                    ))
+                }
+                </Switch>
+                </div>
+                <NavLinkBar data={navList}></NavLinkBar>
+
+            </div>)
+    }
+}
+```
+其中NavBar是从antd-mobile组件中引用的，在这里相当于一个头部组件，而NavLinkBar组件是一个底部组件，该组件类似与我们qq聊天页面的那个底部框，当点击先面相应的图标时，会显示相应的页面信息，会判断当前的url并与传过去的navlist中的path信息做比较，根据结果进行相应的跳转。最后是中间的内容部分，是利用switch来根据相应的path来渲染相应的组件。这些组件有牛人列表组件，Boss列表组件，消息列表，个人中心。
+### Boss身份所看到的是牛人列表
+在牛人列表，我们作为Boss身份想要看到所有的牛人的信息，因此需要从后端获取相应的是牛人身份的用户信息，并把其相应的信息展示出来
+1. 获取相关的用户信息，在这里是在生命周期函数componentDidMount函数中获取相应的信息
+axios.get('/user/list?type=genius')
+        .then(res=>{
+            if(res.data.code===0){
+               dispatch(userList(res.data.data))
+            }
+        }
+2. 将获取到的用户信息展示到列表中，利用anti-mobile中的Card组件将用户信息展示出来
+### 牛人身份所看到的是Boss列表
+与开发牛人列表组件一样，流程也一样，只是看到的用户信息不一样。因此，可以将牛人列表和Boss列表中展示用户信息的部分抽离出来形成一个单独的组件（命名为usercard），与此同时将获取用户信息发送的请求利用redux来管理，因此，新建一个reducer（命名为：chatuser）
+
+
+# 高阶组件（HOC）
+即函数可以作为参数被传递或者是函数可以作为返回值输出
+```js
+function hello(){
+  console.log("hello, Nice to meet you")
+}
+
+function WrapperHello (fn){
+  retur n function(){
+    console.log("before say hello")
+    fn()
+    console.log("after say hello")
+  }
+}
+hello = WrapperHello(hello)
+hello()
+```
+```js
+其实，组件就是一个函数，比如：
+class Hello extends React.Component {
+    render(){
+    return <h2>Hello,I love yogurts</h2>h2>
+  }
+}
+
+创建一个装饰器
+function WrapperHello(Comp){
+  class WrapComp extends React.Component {
+  render(){
+  return (
+      <div>
+        <p>这是一个HOC高阶组件特有的元素</p>
+        <Comp {...this.props}></Comp>
+      </div>
+  )
+}
+}
+return WrapComp
+}
+Hello=WrapperHello(Hello)
+```
+在本项目中，写了一个小小的装饰器angle.form.js,该装饰其用来包裹登录组件和注册组件，使其自带handleChange事件。
+## Socket.io
+基于Web Sockets协议，是基于事件的实时双向通信
+### chat组件
+1. 首先,在入口文件index.js中设置相应的路由
+```js
+<Route path='/chat/:user' component={Chat}></Route>
+```
+为什么是/chat/：user，因为我们可以从redux中获得当前用户的信息，但是需要知道聊天对象user
+2. 实现聊天页面跳转，在牛人列表，或者是Boss列表，点击相应的用户卡片，即可进入聊天页面，实现跳转
+3. 实现前后端联调
+首先，在前端建立一个socket连接，并发送一个事件，然后在后端进行监听
+```js
+import io from 'socket.io-client';
+const socket=io('ws://localhost:9093');//手动连接，因为有跨域
+```
+在后端server.js中：
+```js
+const app = express();//app是一个express实例
+//work with express
+const server=require('http').Server(app);
+
+const io=require('socket.io')(server);
+//io是全局的链接，传入的参数socket是当前的连接，io.on监听事件
+// data是传过来的数据，socket是当前的请求，io是全局的请求
+// 使用io将接收到的数据发送到全局
+
+io.on('connection',function(socket){
+    console.log('user login')   //表示已经和前端连接好了
+    //在后端进行sendmsg的监听
+    socket.on('sendmsg',function(data){
+        // console.log(data);
+        //向全局广播事件，表示已经接收到消息了
+        io.emit('recvmsg',data)
+        const from=data.from
+        const to=data.to
+        const msg=data.msg
+        const chatid=[from,to].sort().join('_')
+        Chat.create({chatid,from,to,content:msg},function(err,doc){
+            io.emit('recvmsg',Object.assign({},doc._doc))
+        })
+        // console.log(data)
+    })
+})
+```
+4.前面的聊天状态并没有入库，因此在后端建立聊天信息模型
+const models={
+    user:{
+    ...
+    },
+    chat: {
+        'chatid':{'type':String,'require':true},//是两个人的id排序拼接起来的字符传
+        'from':{'type':String,'require':true},//聊天的消息是来自谁
+        'to':{'type':String,'require':true},//发给谁的
+        'read':{'type':Boolean,'default':false},//未读的状态只对“to”有效
+        'content':{'type':String,'require':true,'default':''},//聊天内容
+        'create_time':{'type':Number,'default':new Date().getTime()} //发送信息的事件，以便聊天消息页面的展示
+    }
+}
+5.将聊天的请求事件放在redux里面统一进行管理，故新建一个reducer（chat.redux.js）
+设置相应的action（这里设置了三个action：MSG_LIST(获取聊天列表),MSG_RECV(读取信息),MSG_READ(标识已读)），并且这些都是实时获取的;
+6. 这一步：用户发送信息，传给socket，然后socket入库并广播全局
+7.将收到的信息都展示在左边，自己发送的信息样式固定在右边，就像平时qq聊天一样
+```js
+const chatid=getChatId(userid,this.props.user._id)
+const chatmsgs=this.props.chat.chatmsg.filter(v=>v.chatid==chatid)
+{chatmsgs.map(v=>{
+                    const avatar=require(`../img/${users[v.from].avatar}.png`)
+                    return v.from==userid?(
+                        <List key={v._id}>
+                            <Item
+                                thumb={avatar}
+                            >
+                                {v.content}
+                            </Item>
+                        </List>
+                        ):(
+                        <List key={v._id}>
+                            <Item
+                                extra={<img src={avatar} />}
+                                className='chat-me'
+                                >{v.content}
+                            </Item>
+                        </List>
+                        )
+                })}
+```
+8.未读消息的显示（在navlink.js中利用badge）
+```js
+根据路径过滤一下，否则下面的每个图标上都会显示未读数
+badge={v.path=='/msg'? this.props.unread:0}
+```
+9.将用户对应的用户名和头像通过相应的查询条件从后端获取到
+```js
+//server.js
+Router.get('/getmsglist',function(req,res){
+    //只需要当前用户的信息。故利用cookis将所有的用户信息获取出来
+    //{'$or':[{from:user,to:user}]}
+    const user=req.cookies.userid
+    User.find({},function(e,userdoc){
+        let users={}
+        userdoc.forEach(v=>{
+            users[v._id]={name:v.user,avatar:v.avatar}
+        })
+        Chat.find({'$or':[{from:user},{to:user}]},function(err,doc){
+        if(!err){
+            return res.json({code:0,msgs:doc,users:users})
+        }
+    })
+    })
+})
+```
+```js
+//前端获取数据（chat.redux.js）
+export function getMsgList(){
+    return (dispatch,getState)=>{
+        axios.get('/user/getmsglist').then(
+            res=>{
+                if(res.status==200&&res.data.code==0){
+                    const userid=getState().user._id
+                    // console.log('getState',getState());
+                    dispatch(msgList(res.data.msgs,res.data.users,userid))
+                }
+            })
+    }
+}
+
+### 消息列表的实现
+首先，需要清楚，消息列表应该是以用户为单位进行统计;
+然后，根据chatid，按照聊天用户分组
+```js
+const msgGroup={}
+    this.props.chat.chatmsg.forEach(v=>{
+        msgGroup[v.chatid]=msgGroup[v.chatid] || []
+        msgGroup[v.chatid].push(v)
+    })
+```
+其次，利用列表List对其进行渲染，并且列表上显示两个人聊天消息的最后一条消息;通过create_time字段来判断是否是最后一条消息;
+这里要注意消息里面的列表信息有可能是当前用户发送给其他用户的，也有可能是其他用户发给当前用户的，因此from和to是不确定的，因此需要根据from与当前用户进行比较
+```js
+const targetId=v[0].from===userid?v[0].to:v[0].from;
+```
+然后，是未读消息的显示，也是需要对信息进行过滤，只统计其他用户发给当前用户的数量，且是未读的
+```js
+const unreadNum=v.filter(v=>!v.read&&v.to===userid).length
+```
+最后，应该根据时间将最信的消息分组展示在最顶部，因此需要根据发送的最后一条消息的时间来排序，将最新的消息分组渲染在最上面。
+```js
+const chatList = Object.values(msgGroup).sort((a,b)=>{
+            const a_last=this.getLast(a).create_time
+            const b_last=this.getLast(b).create_time
+            return b_last-a_last
+        })
+```
+###消息未读数量更新
+首先，需要知道在React-router4中，this.props中存储了一个match字段，表示当前匹配的路由信息;match里面有isExact字段，还有paramas字段，paramas里面包括path和url，其中path是我们在入口文件中定义的路由，而url是是实际的url。
+我们希望当前的用户在点击了未读消息以后，则需要将read字段的值变为true，这就需要发起请求，并在后端修改相应的read字段，同时将修改的消息数量传递过来;
+收到响应请求以后，利用dispatch事件派发相应的action，在reducer中更新消息数量。更新数量的时候也需要过滤数据，并不是将所有的未读数量都标为已读，需要根据to字段来进行消息数的更新
+```js
+chatmsg:state.chatmsg.map(v=>({...v，read:from===v.from?true:v.read}))//谁（from）发给我的，要和我们当前点进去的v.from相同，才将read字段表示为true（已读），如果不等与，则不改变
+```
+
+###收尾优化
+1、eslint代码校验工具
+2、react16特有的错误处理机制
+3、react性能优化
+
+
 ## Table of Contents
 
 - [项目安装](#)

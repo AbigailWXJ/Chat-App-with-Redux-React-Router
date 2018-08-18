@@ -8,7 +8,7 @@ export function getRedirectPath({type,avatar}){
     // 
     let url=(type==='boss')?'/boss':'/genius';
     if(!avatar){
-        //有头像就表示信息完善了，没有头像就需要去完善用户信息
+        ////表示没有头像信息，需要去完善用户信息（本项目中默认有了头像的情况，就代表已经完善了用户信息，就不需要跳转到完善信息页面去完善信息）
         url +='info'
     }
     return url

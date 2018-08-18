@@ -1,6 +1,6 @@
 
 
-
+//工具函数，专门用于跳转
 export function getRedirectPath({type,avatar}){
     //根据用户信息。返回跳转页面地址
     // 根据user.type 类型跳转到boss页面和genius页面

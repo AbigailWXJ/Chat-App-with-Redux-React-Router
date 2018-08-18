@@ -24,7 +24,7 @@ class BossInfo extends React.Component{
         })
     }
     render(){
-        const path= this.props.location.pathname
+        const path= this.props.location.pathname //获得当前的路由路径，用于下面进行判断，如果路径不变不进行跳转，不一样才进行跳转
         const redirect = this.props.redirectTo
         return (
             <div>

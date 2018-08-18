@@ -1,10 +1,10 @@
 import React from 'react';
 import {List,InputItem,NavBar,Icon,Grid} from 'antd-mobile';
-import io from 'socket.io-client';
 import {connect} from 'react-redux';
 import {getMsgList,sendMsg,recvMsg,readMsg} from '../../reduxs/chat.redux';
 import {getChatId} from '../../util'
-const socket=io('ws://localhost:9093');
+
+
 @connect(
     state=>state,
     {getMsgList,sendMsg,recvMsg,readMsg}
@@ -25,7 +25,7 @@ class Chat extends React.Component{
         }
     }
     componentWillUnmount(){
-        const to = this.props.match.params.user
+        const to = this.props.match.params.user //聊天的对象
         this.props.readMsg(to)
     }
     fixCarousel(){
@@ -50,10 +50,10 @@ class Chat extends React.Component{
             .split(',')
             .filter(v=>v)
             .map(v => ({ text: v }))
-        const userid=this.props.match.params.user
+        const userid=this.props.match.params.user //要聊天的对象
         const Item=List.Item
         const users=this.props.chat.users
-
+        //没有用户信息就不用渲染这个组件了
         if(!users[userid]){
             return null
         }
@@ -67,28 +67,33 @@ class Chat extends React.Component{
                 onLeftClick={()=>{
                     this.props.history.goBack()
                 }}
-                >{users[userid].name}</NavBar>
+                >
+                {users[userid].name}
+                </NavBar>
                 {chatmsgs.map(v=>{
                     const avatar=require(`../img/${users[v.from].avatar}.png`)
                     return v.from==userid?(
                         <List key={v._id}>
                             <Item
                                 thumb={avatar}
-                            >{v.content}</Item>
+                            >
+                                {v.content}
+                            </Item>
                         </List>
                         ):(
                         <List key={v._id}>
                             <Item
                                 extra={<img src={avatar} />}
                                 className='chat-me'
-                                >{v.content}</Item>
+                                >{v.content}
+                            </Item>
                         </List>
                         )
                 })}
                 <div className="stick-footer">
                     <List>
                         <InputItem
-                        placeholder='please input'
+                        placeholder='请输入'
                         value={this.state.text}
                         onChange={v=>{
                             this.setState({text:v})
@@ -106,7 +111,8 @@ class Chat extends React.Component{
                                 <span onClick={()=>this.handleSubmit()}>发送</span>
                             </div>
                         }
-                        ></InputItem>
+                        >
+                        </InputItem>
                     </List>
                     {this.state.showEmoji?<Grid 
                         data={emoji}

@@ -6,7 +6,8 @@ import {connect} from 'react-redux';
 //由于该组件不是路由组件，需要withRoute来提供相关的路由信息
 @withRouter
 @connect(
-    state=>state.chat)
+    state=>state.chat
+)
 class NavLinkBar extends React.Component{
     static propTypes= {
         data: PropTypes.array.isRequired

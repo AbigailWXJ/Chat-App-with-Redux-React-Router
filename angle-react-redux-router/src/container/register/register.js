@@ -4,7 +4,7 @@ import {List, InputItem,Radio, WhiteSpace,Button} from 'antd-mobile';
 import {connect} from 'react-redux';
 import {register} from '../../reduxs/user.redux';
 import {Redirect} from 'react-router-dom';
-import angleForm from '../../component/angle-form/angle.form';
+import angleForm from '../../component/angle-form/angle-form';
 
 @connect(
     state=>state.user,
@@ -17,7 +17,7 @@ class Register extends React.Component{
         this.handleRegister=this.handleRegister.bind(this)
     }
     componentDidMount(){
-        this.props.handleChange('type','genius')
+        this.props.handleChange('type','genius') //添加了一个默认值
     }
     handleRegister(){
         this.props.register(this.props.state)
@@ -30,20 +30,20 @@ class Register extends React.Component{
             <Logo></Logo>
                 <List>
                 {this.props.msg? <p className="error-msg">{this.props.msg}</p>: null}
-                    <InputItem onChange={v=>this.props.handleChange('user',v)}> User Name </InputItem>
+                    <InputItem onChange={v=>this.props.handleChange('user',v)}>用户名</InputItem>
                     <WhiteSpace></WhiteSpace>
-                    <InputItem type='password' onChange={v=>this.props.handleChange('pwd',v)}> Set password </InputItem>
+                    <InputItem type='password' onChange={v=>this.props.handleChange('pwd',v)}>设置密码</InputItem>
                     <WhiteSpace ></WhiteSpace>
-                    <InputItem type='password' onChange={v=>this.props.handleChange('repeatpwd',v)}> Confirm password </InputItem>
+                    <InputItem type='password' onChange={v=>this.props.handleChange('repeatpwd',v)}> 确认密码 </InputItem>
                     <WhiteSpace></WhiteSpace>
                     <RadioItem 
                     checked={this.props.state.type==='genius'}
-                    onChange={()=>this.props.handleChange('type','genius')}>Niu Ren</RadioItem>
+                    onChange={()=>this.props.handleChange('type','genius')}>牛人</RadioItem>
                     <WhiteSpace></WhiteSpace>
                     <RadioItem
                     checked={this.props.state.type==='boss'}
                     onChange={()=>this.props.handleChange('type','boss')}>BOSS</RadioItem>
-                    <Button type='primary' onClick={this.handleRegister}>REGUSTER</Button>
+                    <Button type='primary' onClick={this.handleRegister}>注册</Button>
                 </List>
             </div>)
     }

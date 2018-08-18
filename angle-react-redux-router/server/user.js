@@ -6,7 +6,7 @@ const model = require('./model');
 const User = model.getModel('user');
 const Chat = model.getModel('chat');
 //定义统一的查询条件，即不希望密码之类的暴露出来，在内部使用
-const _filter = {'pwd':0,'_v':0};
+const _filter = {'pwd':0,'__v':0};
 // 清楚聊天内容
 // Chat.remove({},function(e,d){
 
@@ -41,7 +41,7 @@ Router.get('/getmsglist',function(req,res){
 Router.post('/readmsg',function(req,res){
     const userid=req.cookies.userid
     const from=req.body.from
-    console.log(userid,from);
+    // console.log(userid,from);
     Chat.update(
         {from,to:userid},
         {'$set':{read:true}},
@@ -55,12 +55,15 @@ Router.post('/readmsg',function(req,res){
     })
 })
 Router.post('/update',function(req,res){
-    const userid = req.cookies.userid
+    const userid = req.cookies.userid //获取cookies
     if(!userid){
+        //进行cookie校验
         return json.dumps({code:1})
     }
     const body = req.body
+    //查找并更新
     User.findByIdAndUpdate(userid,body,function(err,doc){
+        //将两个信息进行合并
         const data = Object.assign({},{
             user:doc.user,
             type:doc.type,
@@ -82,15 +85,15 @@ Router.post('/login',function(req,res){
     })
 })
 Router.post('/register',function(req,res){
-    console.log(req.body);//req.body是传过来的参数,即从前端传过来的请求
+    // console.log(req.body);//req.body是传过来的参数,即从前端传过来的请求
     const user=req.body.user;
     const pwd=req.body.pwd;
     const type=req.body.type;
-    User.findOne({user:user},_filter,function(err,doc){
+    User.findOne({user:user},_filter,function(err,doc){//因为用户名是不能重复的，所以先查询一下是否存在用户名
         if(doc){
-            return res.json({code:1,msg:'用户名重复'})
+            return res.json({code:1,msg:'用户名重复'})//如果存在，返回消息为{code:1,msg:'用户名重复'}
         }
-        const userModel= new User ({user,type,pwd:md5Pwd(pwd)})
+        const userModel= new User ({user,type,pwd:md5Pwd(pwd)})//因为要获取系统自动生成的_id,所以要先生成后，才能保存
         userModel.save(function(e,d){
             if(e){
                 return res.json({code: 1,msg: '后端出错了'})
@@ -104,14 +107,14 @@ Router.post('/register',function(req,res){
     })
 }
 )
-//读取cookie  id
+
 Router.get('/info',function(req,res){
-    const userid=req.cookies.userid;
+    const userid=req.cookies.userid;//读取cookie  id,在发送请求是读取cookie
     if(!userid){
     // 用户有没有cookie
         return res.json({code:1})
     }
-    User.findOne({_id:userid},function(err,doc){
+    User.findOne({_id:userid}, _filter,function(err,doc){
         if(err){
             return res.json({code:1,msg:'后端出错了'})
         }

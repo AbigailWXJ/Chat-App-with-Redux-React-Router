@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import io from 'socket.io-client';
-const socket=io('ws://localhost:9093');
+const socket=io('ws://localhost:9093');//手动连接，因为有跨域
 //action
 //获取聊天列表
 const MSG_LIST='MSG_LIST';
@@ -57,7 +57,7 @@ export function readMsg(from){
 export function recvMsg(){
     return (dispatch,getState)=>{
         socket.on('recvmsg',function(data){
-            console.log('recvmsg',data)
+            // console.log('recvmsg',data)
             const userid = getState().user._id
             dispatch(msgRecv(data,userid))
         })
@@ -65,6 +65,7 @@ export function recvMsg(){
 }
 export function sendMsg({from,to,msg}){
     return dispatch=>{
+        //发送事件，在后端进行监听
         socket.emit('sendmsg',{from,to,msg})
     }
 }
@@ -74,7 +75,7 @@ export function getMsgList(){
             res=>{
                 if(res.status==200&&res.data.code==0){
                     const userid=getState().user._id
-                    console.log('getState',getState());
+                    // console.log('getState',getState());
                     dispatch(msgList(res.data.msgs,res.data.users,userid))
                 }
             })

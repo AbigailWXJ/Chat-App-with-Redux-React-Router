@@ -5,14 +5,15 @@ import PropTypes from 'prop-types';
 
 class AvatarSelector extends React.Component{
     static propTypes = {
-        selectAvatar: PropTypes.func
+        //属性类型检测
+        selectAvatar: PropTypes.func.isRequired
     }
     constructor(props){
         super(props)
         this.state={}
     }
     render(){
-        const avatarList='boy,girl,man,woman,bull,chick,crab,hedgehog,hippopotamus,koala,lemur,pig,tiger,pig,whale,zebra'.split(',')
+        const avatarList='boy,girl,man,woman,bull,chick,crab,hedgehog,hippopotamus,koala,lemur,pig,tiger,pig,whale'.split(',')
         .map(v=>({
             icon: require(`../img/${v}.png`),
             text:v
@@ -26,10 +27,12 @@ class AvatarSelector extends React.Component{
         return (
             <div>
             <List renderHeader={()=>gridHeader}>
-                <Grid data={avatarList}
+                <Grid
+                data={avatarList}
+                columnNum={5}
                 onClick={elm=>{
                     this.setState(elm)
-                    this.props.selectAvatar(elm.text)
+                    this.props.selectAvatar(elm.text)//将选择的参数的名字通过父组件传入的函数，传给父组件
                 }}></Grid>
             </List>
             </div>)

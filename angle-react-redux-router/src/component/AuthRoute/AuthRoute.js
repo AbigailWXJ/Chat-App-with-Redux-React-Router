@@ -30,7 +30,7 @@ import {connect} from 'react-redux';
             }
         })
         // 是否登录
-        // 现在的url地址 login是不需要跳转的
+        // 现在的url地址 login是不需要跳转的（即如果本来实在登录页面就不需要跳转到登录页面）
         // 用户的type 身份是boss 还是牛人
         // 用户是否完善信息（选择头像 个人简介）
     }
