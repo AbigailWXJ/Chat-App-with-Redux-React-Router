@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "asset-require-hook": "^1.2.0",
     "axios": "^0.16.2",
     "babel-plugin-import": "^1.6.2",
     "body-parser": "^1.18.3",
@@ -11,6 +12,7 @@
     "express": "^4.16.3",
     "mongoose": "^5.1.1",
     "prop-types": "^15.6.1",
+    "rc-queue-anim": "^1.6.5",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",
     "react-redux": "^5.0.7",
@@ -65,7 +67,9 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom",
+    "server1": "nodemon server/server.js",
+    "server": "NODE_ENV=test nodemon --exec babel-node server/server.js"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -108,9 +112,13 @@
   },
   "eslintConfig": {
     "extends": "react-app",
-    "rules":{
-      "eqeqeq":["off"],
-      "jsx-a11y/img-has-alt":[0]
+    "rules": {
+      "eqeqeq": [
+        "off"
+      ],
+      "jsx-a11y/img-has-alt": [
+        0
+      ]
     }
   },
   "proxy": "http://localhost:9093"

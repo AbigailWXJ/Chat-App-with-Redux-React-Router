@@ -2,16 +2,13 @@
 ```
 npm install
 ```
+# 项目打包
+```
+npm run build
+```
 # 项目启动
 ```
-npm start
-```
-# 后端启动
-进入到server文件下
-```
-先启动mongo
-
-nodemon.js
+npm run server
 ```
 # 前期项目准备
 * Express+Mongodb
@@ -70,7 +67,7 @@ nodemon.js
   * jsonp(一种非正式传输协议)，该协议的一个要点就是允许用户传递一个callback参数给服务端，然后服务端返回数据时会将这个callback参数作为函数名来包裹住json数据，这样客户端就可以随意定制自己的函数来自动处理返回的数据
   
 # antd-mobile插件
-[官网链接](https://mobile.ant.design/index-cn)
+基于react的一个UI库：[官网链接](https://mobile.ant.design/index-cn)
 为了实现按需加载的功能，安装插件babel-plugin-import，并在package.json文件中进行配置
 ```json
 "babel": {
@@ -1051,13 +1048,227 @@ chatmsg:state.chatmsg.map(v=>({...v，read:from===v.from?true:v.read}))//谁（f
 1、eslint代码校验工具
 2、react16特有的错误处理机制
 3、react性能优化
+#### 性能优化
+性能优化：react本身的性能优化（组件内部的性能优化和组件之间的优化），redux的优化（有些生成state的过程的计算），服务端渲染以及SSR，让首屏速度更快，以及懒加载等方式
+* 组件优化：1、this的绑定;2、尽量避免在render中定义变量，属性传递的时候尽量少传且注意不要直接定义变量
+* 多组件优化：定制shouldComponentUpdate，或者使用相应的库;插件PureComponent针对组件内部无状态，只是从父组件传递参数时非常有用，它只进行简单的浅层比较。
+而reselect库相当与是将从state中获取数据，和将获取到的数据变成组件内部可用的数据分成了两步，内部会做一些缓存，因此相对于性能会比较好一点
+* 遍历数组是一定要加key
+#### eslint代码校验工具
+可配置一些个人的配置;
 
+```js
+"eslintConfig": {
+    "extends": "react-app",
+    "rules":{
+      "eqeqeq":["off"],
+      "jsx-a11y/img-has-alt":[0] //0也表示是关闭的意思
+    }
+  },
+```
+* 服务器端渲染
+1. 需要node环境支持es6语法，需要使用babel-node;故安装插件：npm install babel-cli --save;
+2. 修改配置，新建一个文件（.babelrc）对babel进行配置,使后端和前端一样支持React组件的书写形式;
+```js
+//.babelrc
+ {
+    "presets": [
+      "react-app"
+    ],
+    "plugins": [
+      [
+        "import",
+        {
+          "libraryName": "antd-mobile",
+          "style": "css"
+        }
+      ],
+      "transform-decorators-legacy"
+    ]
+  }
+  ```
+  3. 修改server.js文件，使用import代替requre引入文件
+  4. 使用react-dom-Server来做服务端渲染，引入{renderToString} from react-dom/server;目的是使react组件可以被渲染Dom树;
+  5. 为了使后端支持css以及图片文件，需要引入两个库：
+  npm install css-modules-require-hook --save
+  npm install asset-require-hook --save
+  6. 修改server.js,完成服务器端渲染:
+  ```js
+  import express from 'express';//引入express模块
+  import utils from 'utility';
+  import bodyParser from 'body-parser';//用于解析post过来的json
+  import cookieParser from 'cookie-parser';//用于解析cookie
+  import model from './model';
+  import path from 'path';
+  //https://github.com/css-modules/css-modules-require-hook
+  import csshook from 'css-modules-require-hook/preset' // import hook before routes
+  import assethook from 'asset-require-hook';
+  assethook({
+      extensions:['png']
+  })
+
+  import React from 'react';
+  import { createStore, applyMiddleware, compose} from 'redux';
+  import thunk from 'redux-thunk';
+  import {Provider} from 'react-redux';
+  import {StaticRouter} from 'react-router-dom';
+  import App from '../src/App';
+  import reducers from '../src/reducers';
+
+
+  import {renderToString} from 'react-dom/server';
+  import staticPath from '../build/asset-manifest.json';//获取静态资源文件，因为文件在变化，需要动态的引入
+  // console.log(staticPath)
+
+  const Chat = model.getModel('chat');
+  const app = express();//app是一个express实例
+  const server=require('http').Server(app);//work with express
+  const io=require('socket.io')(server);
+
+  //io是全局的链接，传入的参数socket是当前的连接，io.on监听事件
+  // data是传过来的数据，socket是当前的请求，io是全局的请求
+  // 使用io将接收到的数据发送到全局
+
+  io.on('connection',function(socket){
+      console.log('user login')//说明用户已经
+      socket.on('sendmsg',function(data){
+          // console.log(data);
+          io.emit('recvmsg',data)//发送全局事件
+          const from=data.from
+          const to=data.to
+          const msg=data.msg
+          const chatid=[from,to].sort().join('_')
+          Chat.create({chatid,from,to,content:msg},function(err,doc){
+              io.emit('recvmsg',Object.assign({},doc._doc))
+          })
+          // console.log(data)
+      })
+  })
+
+  const userRouter = require('./user');
+
+  app.use(cookieParser())    //  先解析cookie
+  app.use(bodyParser.json())   //解析post传过来的json
+  //开启一个中间件,若中间件是路由的话，在前面就用路由的形式,userRouter是一个子路由的形式
+  app.use('/user',userRouter);
+  // app.listen(9093,function(){
+  //     console.log('Node app start at port 9093');
+  // })
+
+  //设置静态资源地址
+  app.use(function(req,res,next){
+      if(req.url.startsWith('/user/')||req.url.startsWith('/static/')){
+          return next()
+      }
+      const store=createStore(reducers,compose(
+      applyMiddleware(thunk),
+      ))
+      let context = {}
+      const markup=renderToString(
+          (<Provider store={store}>
+              <StaticRouter
+                  location={req.url}
+                  context={context}>
+                  <App></App>
+              </StaticRouter>
+          </Provider>)
+          )
+      const obj={
+          '/msg':'React聊天消息页面',
+          '/boss':'Boss查看牛人列表页'
+      }
+      const pageHtml = `
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <meta name="theme-color" content="#000000">
+              <meta name="keywords" content="React,Redux,Chat,SSR">
+              <meta name="description" content='${obj[req.url]}'>
+              <title>React App</title>
+              <link rel="stylesheet" href="/${staticPath['main.css']}" />
+            </head>
+            <body>
+              <div id="root">${markup}</div>
+              <script src="/${staticPath['main.js']}"></script>
+            </body>
+          </html>
+      `
+      // return res.sendFile(path.resolve('build/index.html'))
+      res.send(pageHtml)
+  })
+  app.use('/',express.static(path.resolve('build')))
+  server.listen(9093,function(){
+      console.log('Node app start at port 9093');
+  })
+ ```
+ ## React16 新特性
+ * 新版本带来的新特性和新功能呢个
+ 1. 新的核心算法Fiber
+ 2. Render更为灵活，可以返回数组，字符串
+ 3. 错误处理机制
+ 4. Portals组件（React 可在DOM节点之外渲染元素，比如弹窗的效果）
+ 5. 更好更快的服务端渲染
+ 6. 体积更小，MIT协议（完全开源）
+ 7. 还增加了一个新的生命周期函数：componentDidCatch（）;可用于处理错误
+ * 新版本更快的流失渲染
+ 1. 之前版本的renderToString 解析为字符串;
+ 2. 新版本的renderToNodeStream 解析为可读的字节流对象;
+ 3. 并使用ReactDom.hydrate取代render
+* 使用renderToNodeStream来进行服务器端渲染
+```js
+//server.js
+app.use(function(req,res,next){
+    if(req.url.startsWith('/user/')||req.url.startsWith('/static/')){
+        return next()
+    }
+    const store=createStore(reducers,compose(
+    applyMiddleware(thunk),
+    ))
+    const obj={
+        '/msg':'React聊天消息页面',
+        '/boss':'Boss查看牛人列表页'
+    }
+    let context = {}
+    res.write(`<!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <meta name="theme-color" content="#000000">
+            <meta name="keywords" content="React,Redux,Chat,SSR">
+            <meta name="description" content='${obj[req.url]}'>
+            <title>React App</title>
+            <link rel="stylesheet" href="/${staticPath['main.css']}" />
+          </head>
+          <body>
+            <div id="root">`)
+    const markupStream = renderToNodeStream(
+        (<Provider store={store}>
+            <StaticRouter
+                location={req.url}
+                context={context}>
+                <App></App>
+            </StaticRouter>
+        </Provider>)
+        )
+    markupStream.pipe(res,{end:false})
+    markupStream.on('end',()=>{
+        res.write(`</div>
+            <script src="/${staticPath['main.js']}"></script>
+          </body>
+        </html>`)
+        res.end()
+    })
+})
+```
 
 ## Table of Contents
 
 - [项目安装](#)
+- [项目打包](#)
 - [项目启动](#)
-- [后端启动](#)
 - [前期项目准备](#)
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
