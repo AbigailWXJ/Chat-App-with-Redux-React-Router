@@ -34,10 +34,10 @@ const io=require('socket.io')(server);
 // 使用io将接收到的数据发送到全局
 
 io.on('connection',function(socket){
-    console.log('user login')//说明用户已经
+    console.log('user login')//说明用户已经登录进来
     socket.on('sendmsg',function(data){
         // console.log(data);
-        io.emit('recvmsg',data)//发送全局事件
+        // io.emit('recvmsg',data)//发送全局事件
         const from=data.from
         const to=data.to
         const msg=data.msg
