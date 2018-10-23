@@ -5,7 +5,7 @@
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
 - [redux基础准备](#redux)
-- [<h2 id="react_redux">手动链接react和redux</h2>](#h2-idreact-reduxreactredux-h2)
+- [手动链接react和redux](#reactredux)
 - [使用react-redux插件来优雅的连接react和redux](#react-reduxreactredux)
 - [使用connect装饰器](#connect)
 - [App实现过程](#app)
@@ -165,9 +165,9 @@ store.dispatch({type:APPLY_FOR_WEAPON});
 
 * 补充：如果全局属性较多，即对不同的全局属性有不同的reduce的时候，此时，需要一个combinReducer将所有的reducer合并起来，形成reducers，传给createrStore函数用于生成store。
 
-总结一下redux工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
+* 总结一下redux工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
 
-# <h2 id="react_redux">手动链接react和redux</h2>
+# 手动链接react和redux
 1. 将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
 ```js
 const HAND_IN_WEAPON = "HAND_IN_WEAPON";
@@ -920,7 +920,29 @@ Hello=WrapperHello(Hello)
 ```
 在本项目中，写了一个小小的装饰器angle.form.js,该装饰其用来包裹登录组件和注册组件，使其自带handleChange事件。
 ## Socket.io
-基于Web Sockets协议，是基于事件的实时双向通信
+基于Web Sockets协议，是基于事件的实时双向通信库。事件进行双向通信，配合express，快速开发实时应用（端口API：on,once,emit）
+* socket.io与ajax的区别
+   
+  * 准确地说，socket.io只是实现webSocket的一个库，ajax实现异步刷新，异步获取数据;
+  * 基于不同的协议;ajax基于http协议，单向，实时获取数据只能通过轮询;socket.io基于WebSocket双向通信协议，后端可以推送数据;
+* webSocket 协议与HTTP 协议的主要区别是可以双向发送数据，服务器端有新数据的时候，会自动推送数据。
+* 在本项目中，socket.io 后端API（与express配合使用）
+  ```js
+  const app=express();
+  const server=require('http').Server(app);
+  const io=require('socket.io')(server);
+  ...
+
+  server.listen(9093,function(){
+    console.log('Node app start at port 9093')
+  })
+  ```
+* socket.io前端API（socket.io-client）
+  因为前后端的端口不一样，则需要手动进行连接一下：
+  ```js
+   const socket=io('ws://localhost:9093')
+  ```
+
 ### chat组件
 1. 首先,在入口文件index.js中设置相应的路由
 ```js
@@ -1305,3 +1327,20 @@ app.use(function(req,res,next){
 })
 ```
 # Summary
+- redux逻辑（项目中使用了三个redux逻辑）
+  - user.redux.js 负责登录，注册，路由组件的action主要是异步发送请求以及从后端获取信息利用 reducer进行相应状态的更新
+  - chat.redux.js 负责聊天功能的action与reducer，主要是异步发送数据，并向后端提交信息以及从后端获取信息
+  - chatUser.redux.js 负责boss列表页面，牛人列表页面的action和reducer
+- 支持聊天整个功能实现的主要action，以及对应的后端处理
+  - 前端主要逻辑
+    - MsgList：利用axios向后端发送get请求;传入的参数是相关的路由;收到相关的响应消息后做相应的处理（返回后并派发相应的action，并将返回的res信息传入到相应的action函数中，并且传入到action函数中的参数还包括getState()中得到的userid）;
+    - MsgRecv：通过socket链接的on方法监听recvmsg事件，传给对应的action参数也是后端响应中的信息;
+    - MsgSend：利用socket.emit('sendmsg',{from,to,msg})
+    - MsgRead：利用axios向后端发送post请求，发送请求中传入的参数有：from的id，当前登录用户id，具体的msg;传给相应的action的参数为（userid，from，num：res.data.num）
+  - 后端主要对应的逻辑
+    - Router.get('/getmsglist',function(req,res){//首先，通过cookie获取到当前登录用户的userid;//利用User数据库模型的find函数+条件查询; 将用户的id作为键名，键值由name和头像组成的对象，并在chat字段中查找from和to字段都为user的消息集合并返回给前端})
+    - 在io.on中监听connection，接受到前端的socket链接，并利用socket.on方法监听sendmsg事件，当监听到sendmsg事件后，利用chat字段的create方法把sendmsg中传递过来的from，to，msg参数保存在数据库中，与此同时，利用全局链接的emit方法发送一个recvmsg事件，并把对应发送过来的文档的信息传入，进行合并
+    - Router.post('/update',function(req,res){//通过cookie获取到当前用户的id;并把提交过来的from参数从body提取出来;//利用chat字段的update方法进行更新})
+- Q&A
+  - 在消息页面聊天时同步消息的解决方案;若未解决会出现同步时看过的消息，需要再进入页面时，再进行更新
+  - 解决方案有两种：1、只要在当前path中，进行更新;2、将readMsg（）从之前的componentDidMount（）声明周期函数中迁移到componentWillUnMount()生命周期函数中
