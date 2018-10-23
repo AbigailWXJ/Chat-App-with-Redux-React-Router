@@ -5,7 +5,7 @@
 - [前后端端口不一致的解决方法](#)
 - [antd-mobile插件](#antd-mobile)
 - [redux基础准备](#redux)
-- [手动链接react和redux](#reactredux)
+- [<h2 id="react_redux">手动链接react和redux</h2>](#h2-idreact-reduxreactredux-h2)
 - [使用react-redux插件来优雅的连接react和redux](#react-reduxreactredux)
 - [使用connect装饰器](#connect)
 - [App实现过程](#app)
@@ -167,7 +167,7 @@ store.dispatch({type:APPLY_FOR_WEAPON});
 
 总结一下redux工作的原理：首先，调用store.dispatch()将action作为参数传入，同时getState方法获取当前的状态树state并注册subscribe函数监听state的变化，再调用combineReducers并获取的state和action传入。combineReducer会将传入的state和action传给所有的reducer，然后reducer根据action.type返回新的state，触发state树的更新，我们调用subscribe监听到state变化后，用getState获取新的state数据
 
-# 手动链接react和redux
+# <h2 id="react_redux">手动链接react和redux</h2>
 1. 将action和reducer抽离出来，单独形成一个js文件，比如App.redux.js
 ```js
 const HAND_IN_WEAPON = "HAND_IN_WEAPON";
